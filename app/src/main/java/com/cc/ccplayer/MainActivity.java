@@ -8,19 +8,17 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.MediaController;
-import android.widget.VideoView;
 
-import com.cc.ccplaye.BaseMediaController;
-import com.cc.ccplaye.CCMediaController;
-import com.cc.ccplaye.CCVideoView;
 import com.cc.ccplaye.IMediaPlayer;
+import com.cc.ccplaye.MediaController;
+import com.cc.ccplaye.MyMediaController;
+import com.cc.ccplaye.VideoView;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private CCVideoView mVideoView;
+    private VideoView mVideoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,15 +26,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mVideoView = findViewById(R.id.videoview_play);
-//        CCMediaController mediaController = new CCMediaController(this);
-        MediaController mediaController = new MediaController(this);
+        MyMediaController mediaController = new MyMediaController(this);
         mVideoView.setMediaController(mediaController);
-//        mVideoView.setBaseMediaController(new BaseMediaController(this));
 
         String uri = ("https://mov.bn.netease.com/open-movie/nos/mp4/2016/01/11/SBC46Q9DV_hd.mp4");
         mVideoView.setVideoURI(Uri.parse(uri));
-        mVideoView.start();
-
 
         Button button = findViewById(R.id.btn_next);
         button.setOnClickListener(new View.OnClickListener() {
@@ -79,5 +73,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mVideoView.start();
+    }
 }

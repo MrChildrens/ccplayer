@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.cc.ccplaye.CCVideoView
+    <com.cc.ccplaye.VideoView
         android:id="@+id/videoview_play"
         android:layout_width="0dp"
         android:layout_height="0dp"

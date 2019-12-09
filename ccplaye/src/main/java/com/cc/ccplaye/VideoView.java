@@ -21,27 +21,39 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.MediaController;
 
 import androidx.annotation.NonNull;
 
 import com.cc.ccplaye.ijkplayer.IjkPlayer;
+import com.cc.ccplaye.render.SurfaceRenderView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+
+import static com.cc.ccplaye.IMediaPlayer.OnBufferingUpdateListener;
+import static com.cc.ccplaye.IMediaPlayer.OnCompletionListener;
+import static com.cc.ccplaye.IMediaPlayer.OnErrorListener;
+import static com.cc.ccplaye.IMediaPlayer.OnInfoListener;
+import static com.cc.ccplaye.IMediaPlayer.OnPreparedListener;
+import static com.cc.ccplaye.IMediaPlayer.OnVideoSizeChangedListener;
+import static com.cc.ccplaye.IMediaPlayer.STATE_ERROR;
+import static com.cc.ccplaye.IMediaPlayer.STATE_IDLE;
+import static com.cc.ccplaye.IMediaPlayer.STATE_PAUSED;
+import static com.cc.ccplaye.IMediaPlayer.STATE_PLAYBACK_COMPLETED;
+import static com.cc.ccplaye.IMediaPlayer.STATE_PLAYING;
+import static com.cc.ccplaye.IMediaPlayer.STATE_PREPARED;
+import static com.cc.ccplaye.IMediaPlayer.STATE_PREPARING;
 
 /**
  * @author: Ciel
  * @date: 2019/12/5
  */
 
-public class CCVideoView extends FrameLayout
+public class VideoView extends FrameLayout
         implements MediaController.MediaPlayerControl {
-    private static final String TAG = CCVideoView.class.getSimpleName()
-            ;
+    private static final String TAG = VideoView.class.getSimpleName();
 
     // settable by the client
     private Uri mUri;
@@ -52,8 +64,8 @@ public class CCVideoView extends FrameLayout
     // For instance, regardless the VideoView object's current state,
     // calling pause() intends to bring the object to a target state
     // of STATE_PAUSED.
-    private int mCurrentState = IMediaPlayer.STATE_IDLE;
-    private int mTargetState = IMediaPlayer.STATE_IDLE;
+    private int mCurrentState = STATE_IDLE;
+    private int mTargetState = STATE_IDLE;
 
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
@@ -69,12 +81,12 @@ public class CCVideoView extends FrameLayout
     private SurfaceRenderView mSurfaceView;
     private MediaController mMediaController;
 
-    private IMediaPlayer.OnCompletionListener mOnCompletionListener;
-    private IMediaPlayer.OnPreparedListener mOnPreparedListener;
+    private OnCompletionListener mOnCompletionListener;
+    private OnPreparedListener mOnPreparedListener;
 
     private int mCurrentBufferPercentage;
-    private IMediaPlayer.OnErrorListener mOnErrorListener;
-    private IMediaPlayer.OnInfoListener mOnInfoListener;
+    private OnErrorListener mOnErrorListener;
+    private OnInfoListener mOnInfoListener;
     private int mSeekWhenPrepared;  // recording the seek position while preparing
     private boolean mCanPause;
     private boolean mCanSeekBack;
@@ -85,19 +97,19 @@ public class CCVideoView extends FrameLayout
 
     private Context mContext;
 
-    public CCVideoView(Context context) {
+    public VideoView(Context context) {
         this(context, null);
     }
 
-    public CCVideoView(Context context, AttributeSet attrs) {
+    public VideoView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public CCVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public VideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public CCVideoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public VideoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mContext = context;
         mVideoWidth = 0;
@@ -107,30 +119,31 @@ public class CCVideoView extends FrameLayout
         mAudioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build();
 
-//        LayoutInflater.from(mContext).inflate(R.layout.cc_playview, this, true);
-//        mSurfaceView = findViewById(R.id.cc_surfaceview);
-
-        mSurfaceView = new SurfaceRenderView(mContext);
-        mSurfaceView.getHolder().addCallback(mSHCallback);
-        mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER);
-        mSurfaceView.setLayoutParams(lp);
-        addView(mSurfaceView);
+        initSurfaceView();
 
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
 
-        mCurrentState = IMediaPlayer.STATE_IDLE;
-        mTargetState = IMediaPlayer.STATE_IDLE;
+        mCurrentState = STATE_IDLE;
+        mTargetState = STATE_IDLE;
+    }
+
+    private void initSurfaceView() {
+        mSurfaceView = new SurfaceRenderView(mContext);
+        mSurfaceView.getHolder().addCallback(mSHCallback);
+        mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        LayoutParams lp = new LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER);
+        mSurfaceView.setLayoutParams(lp);
+        addView(mSurfaceView);
     }
 
     @Override
     public CharSequence getAccessibilityClassName() {
-        return CCVideoView.class.getName();
+        return VideoView.class.getName();
     }
 
     public int resolveAdjustedSize(int desiredSize, int measureSpec) {
@@ -166,6 +179,7 @@ public class CCVideoView extends FrameLayout
      *                to disallow or allow cross domain redirection.
      */
     public void setVideoURI(Uri uri, Map<String, String> headers) {
+        Log.d(TAG, "[Ciel_Debug] #setVideoURI()#: openVideo()");
         mUri = uri;
         mHeaders = headers;
         mSeekWhenPrepared = 0;
@@ -196,6 +210,7 @@ public class CCVideoView extends FrameLayout
                 && focusGain != AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE) {
             throw new IllegalArgumentException("Illegal audio focus type " + focusGain);
         }
+        Log.d(TAG, "[Ciel_Debug] #setAudioFocusRequest()#: focusGain: " + focusGain);
         mAudioFocusType = focusGain;
     }
 
@@ -208,6 +223,7 @@ public class CCVideoView extends FrameLayout
         if (attributes == null) {
             throw new IllegalArgumentException("Illegal null AudioAttributes");
         }
+        Log.d(TAG, "[Ciel_Debug] #setAudioAttributes()#: ");
         mAudioAttributes = attributes;
     }
 
@@ -247,12 +263,13 @@ public class CCVideoView extends FrameLayout
     }
 
     public void stopPlayback() {
+        Log.d(TAG, "[Ciel_Debug] #stopPlayback()#: ");
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
-            mCurrentState = IMediaPlayer.STATE_IDLE;
-            mTargetState = IMediaPlayer.STATE_IDLE;
+            mCurrentState = STATE_IDLE;
+            mTargetState = STATE_IDLE;
             mAudioManager.abandonAudioFocus(null);
         }
     }
@@ -260,6 +277,12 @@ public class CCVideoView extends FrameLayout
     private void openVideo() {
         if (mUri == null || mSurfaceHolder == null) {
             // not ready for playback just yet, will try again later
+            if (mUri == null) {
+                Log.d(TAG, "[Ciel_Debug] #openVideo()#: Uri is null");
+            }
+            if (mSurfaceHolder == null) {
+                Log.d(TAG, "[Ciel_Debug] #openVideo()#: SurfaceHolder is null");
+            }
             return;
         }
         // we shouldn't clear the target state, because somebody might have
@@ -295,18 +318,18 @@ public class CCVideoView extends FrameLayout
 
             // we don't set the target state here either, but preserve the
             // target state that was there before.
-            mCurrentState = IMediaPlayer.STATE_PREPARING;
+            mCurrentState = STATE_PREPARING;
             attachMediaController();
         } catch (IOException ex) {
-            Log.w(TAG, "Unable to open content: " + mUri, ex);
-            mCurrentState = IMediaPlayer.STATE_ERROR;
-            mTargetState = IMediaPlayer.STATE_ERROR;
+            Log.w(TAG, "[Ciel_Debug] #openVideo()#: Unable to open content: " + mUri, ex);
+            mCurrentState = STATE_ERROR;
+            mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         } catch (IllegalArgumentException ex) {
-            Log.w(TAG, "Unable to open content: " + mUri, ex);
-            mCurrentState = IMediaPlayer.STATE_ERROR;
-            mTargetState = IMediaPlayer.STATE_ERROR;
+            Log.w(TAG, "[Ciel_Debug] #openVideo()#: Unable to open content: " + mUri, ex);
+            mCurrentState = STATE_ERROR;
+            mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         } finally {
@@ -316,29 +339,33 @@ public class CCVideoView extends FrameLayout
 
     public void setMediaController(MediaController controller) {
         if (mMediaController != null) {
+            Log.d(TAG, "[Ciel_Debug] #setMediaController()#: MediaController#hide()");
             mMediaController.hide();
         }
         mMediaController = controller;
+        Log.d(TAG, "[Ciel_Debug] #setMediaController()#: attachMediaController()");
         attachMediaController();
     }
 
     private void attachMediaController() {
         if (mMediaPlayer != null && mMediaController != null) {
+            Log.d(TAG, "[Ciel_Debug] #attachMediaController()#: ");
             mMediaController.setMediaPlayer(this);
             mMediaController.setAnchorView(this);
             mMediaController.setEnabled(isInPlaybackState());
         }
     }
 
-    IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
-            new IMediaPlayer.OnVideoSizeChangedListener() {
+    OnVideoSizeChangedListener mSizeChangedListener =
+            new OnVideoSizeChangedListener() {
                 @Override
                 public void onVideoSizeChanged(IMediaPlayer mp, int width, int height) {
-                    Log.d(TAG, "onVideoSizeChanged: width: " + width + ", height: " + height);
                     mVideoWidth = mp.getVideoWidth();
                     mVideoHeight = mp.getVideoHeight();
+                    Log.d(TAG, "[Ciel_Debug] #onVideoSizeChanged()#: VideoWidth: " + mVideoWidth + ", VideoHeight: " + mVideoHeight);
                     if (mVideoWidth != 0 && mVideoHeight != 0) {
                         if (mSurfaceView != null) {
+                            Log.d(TAG, "[Ciel_Debug] #onVideoSizeChanged()#: SurfaceView#setVideoSize()");
                             mSurfaceView.setVideoSize(mVideoWidth, mVideoHeight);
                         }
                         requestLayout();
@@ -346,10 +373,10 @@ public class CCVideoView extends FrameLayout
                 }
             };
 
-    IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
+    OnPreparedListener mPreparedListener = new OnPreparedListener() {
         @Override
         public void onPrepared(IMediaPlayer mp) {
-            mCurrentState = IMediaPlayer.STATE_PREPARED;
+            mCurrentState = STATE_PREPARED;
 
             // Get the capabilities of the player for this stream
 //            Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
@@ -377,28 +404,29 @@ public class CCVideoView extends FrameLayout
 
             int seekToPosition = mSeekWhenPrepared;  // mSeekWhenPrepared may be changed after seekTo() call
             if (seekToPosition != 0) {
+                Log.d(TAG, "[Ciel_Debug] #onPrepared()#: seekTo(): " + seekToPosition);
                 seekTo(seekToPosition);
             }
+            Log.d(TAG, "[Ciel_Debug] #onPrepared()#: VideoWidth: " + mVideoWidth + ", VideoHeight: " + mVideoHeight);
             if (mVideoWidth != 0 && mVideoHeight != 0) {
                 //Log.i("@@@@", "video size: " + mVideoWidth +"/"+ mVideoHeight);
 //                getHolder().setFixedSize(mVideoWidth, mVideoHeight);
-                Log.d(TAG, "onPrepared: suficaeWidth: " + mSurfaceWidth + ", surfaceHeight: " + mSurfaceHeight);
-                Log.d(TAG, "onPrepared: mVideoWidth: " + mVideoWidth + ", mVideoHeight: " + mVideoHeight);
+                if (mSurfaceView != null) {
+                    Log.d(TAG, "[Ciel_Debug] #onPrepared()#: SurfaceView#setVideoSize()");
+                    mSurfaceView.setVideoSize(mVideoWidth, mVideoHeight);
+                }
                 if (mSurfaceWidth == mVideoWidth && mSurfaceHeight == mVideoHeight) {
                     // We didn't actually change the size (it was already at the size
                     // we need), so we won't get a "surface changed" callback, so
                     // start the video here instead of in the callback.
-                    if (mTargetState == IMediaPlayer.STATE_PLAYING) {
+                    if (mTargetState == STATE_PLAYING) {
+                        Log.d(TAG, "[Ciel_Debug] #onPrepared()#: TargetState is STATE_PLAYING. start()");
                         start();
-                        if (mMediaController != null) {
-                            Log.d(TAG, "onPrepared: isshow");
-                            mMediaController.show();
-                        }
                     } else if (!isPlaying() &&
                             (seekToPosition != 0 || getCurrentPosition() > 0)) {
                         if (mMediaController != null) {
                             // Show the media controls when we're paused into a video and make 'em stick.
-                            Log.d(TAG, "onPrepared: isshow");
+                            Log.d(TAG, "[Ciel_Debug] #onPrepared()#: is paused, MediaController.show()");
                             mMediaController.show(0);
                         }
                     }
@@ -406,19 +434,20 @@ public class CCVideoView extends FrameLayout
             } else {
                 // We don't know the video size yet, but should start anyway.
                 // The video size might be reported to us later.
-                if (mTargetState == IMediaPlayer.STATE_PLAYING) {
+                if (mTargetState == STATE_PLAYING) {
+                    Log.d(TAG, "[Ciel_Debug] #onPrepared()#: TargetState is STATE_PLAYING, but don't know the video size yet. start()");
                     start();
                 }
             }
         }
     };
 
-    private IMediaPlayer.OnCompletionListener mCompletionListener =
-            new IMediaPlayer.OnCompletionListener() {
+    private OnCompletionListener mCompletionListener =
+            new OnCompletionListener() {
                 @Override
                 public void onCompletion(IMediaPlayer mp) {
-                    mCurrentState = IMediaPlayer.STATE_PLAYBACK_COMPLETED;
-                    mTargetState = IMediaPlayer.STATE_PLAYBACK_COMPLETED;
+                    mCurrentState = STATE_PLAYBACK_COMPLETED;
+                    mTargetState = STATE_PLAYBACK_COMPLETED;
                     if (mMediaController != null) {
                         mMediaController.hide();
                     }
@@ -431,25 +460,28 @@ public class CCVideoView extends FrameLayout
                 }
             };
 
-    private IMediaPlayer.OnInfoListener mInfoListener =
-            new IMediaPlayer.OnInfoListener() {
+    private OnInfoListener mInfoListener =
+            new OnInfoListener() {
                 @Override
-                public boolean onInfo(IMediaPlayer mp, int arg1, int arg2) {
+                public boolean onInfo(IMediaPlayer mp, int what, int extra) {
                     if (mOnInfoListener != null) {
-                        mOnInfoListener.onInfo(mp, arg1, arg2);
+                        Log.d(TAG, "[Ciel_Debug] #onInfo()#: what: " + what + ", extra: " + extra);
+                        mOnInfoListener.onInfo(mp, what, extra);
                     }
                     return true;
                 }
             };
 
-    private IMediaPlayer.OnErrorListener mErrorListener =
-            new IMediaPlayer.OnErrorListener() {
+    private OnErrorListener mErrorListener =
+            new OnErrorListener() {
                 @Override
                 public boolean onError(IMediaPlayer mp, int framework_err, int impl_err) {
-                    Log.d(TAG, "Error: " + framework_err + "," + impl_err);
-                    mCurrentState = IMediaPlayer.STATE_ERROR;
-                    mTargetState = IMediaPlayer.STATE_ERROR;
+                    Log.d(TAG, "[Ciel_Debug] #onError()#: framework_err: " + framework_err + ", impl_err: " + impl_err);
+
+                    mCurrentState = STATE_ERROR;
+                    mTargetState = STATE_ERROR;
                     if (mMediaController != null) {
+                        Log.d(TAG, "[Ciel_Debug] #onError()#: MediaController.hide()");
                         mMediaController.hide();
                     }
 
@@ -496,8 +528,8 @@ public class CCVideoView extends FrameLayout
                 }
             };
 
-    private IMediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
-            new IMediaPlayer.OnBufferingUpdateListener() {
+    private OnBufferingUpdateListener mBufferingUpdateListener =
+            new OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(IMediaPlayer mp, int percent) {
                     mCurrentBufferPercentage = percent;
@@ -510,7 +542,7 @@ public class CCVideoView extends FrameLayout
      *
      * @param l The callback that will be run
      */
-    public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l) {
+    public void setOnPreparedListener(OnPreparedListener l) {
         mOnPreparedListener = l;
     }
 
@@ -520,7 +552,7 @@ public class CCVideoView extends FrameLayout
      *
      * @param l The callback that will be run
      */
-    public void setOnCompletionListener(IMediaPlayer.OnCompletionListener l) {
+    public void setOnCompletionListener(OnCompletionListener l) {
         mOnCompletionListener = l;
     }
 
@@ -532,7 +564,7 @@ public class CCVideoView extends FrameLayout
      *
      * @param l The callback that will be run
      */
-    public void setOnErrorListener(IMediaPlayer.OnErrorListener l) {
+    public void setOnErrorListener(OnErrorListener l) {
         mOnErrorListener = l;
     }
 
@@ -542,7 +574,7 @@ public class CCVideoView extends FrameLayout
      *
      * @param l The callback that will be run
      */
-    public void setOnInfoListener(IMediaPlayer.OnInfoListener l) {
+    public void setOnInfoListener(OnInfoListener l) {
         mOnInfoListener = l;
     }
 
@@ -550,21 +582,27 @@ public class CCVideoView extends FrameLayout
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format,
                                    int w, int h) {
-            Log.d(TAG, "surfaceChanged: suficaeWidth: " + w + ", surfaceHeight: " + h);
             mSurfaceWidth = w;
             mSurfaceHeight = h;
-            boolean isValidState = (mTargetState == IMediaPlayer.STATE_PLAYING);
+            Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: SurfaceWidth: " + mSurfaceWidth + ", SurfaceHeight: " + mSurfaceHeight);
+            Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: VideoWidth: " + mVideoWidth + ", VideoHeight: " + mVideoHeight);
+            boolean isValidState = (mTargetState == STATE_PLAYING);
             boolean hasValidSize = (mVideoWidth == w && mVideoHeight == h);
+            Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: isValidState: " + isValidState);
+            Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: hasValidSize: " + hasValidSize);
             if (mMediaPlayer != null && isValidState && hasValidSize) {
                 if (mSeekWhenPrepared != 0) {
+                    Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: seekTo: " + mSeekWhenPrepared);
                     seekTo(mSeekWhenPrepared);
                 }
+                Log.d(TAG, "[Ciel_Debug] #surfaceChanged()#: start()");
                 start();
             }
         }
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
+            Log.d(TAG, "[Ciel_Debug] #surfaceCreated()#: openVideo()");
             mSurfaceHolder = holder;
             openVideo();
         }
@@ -572,6 +610,7 @@ public class CCVideoView extends FrameLayout
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
             // after we return from this we can't use the surface any more
+            Log.d(TAG, "[Ciel_Debug] #surfaceDestroyed()#: release()");
             mSurfaceHolder = null;
             if (mMediaController != null) {
                 mMediaController.hide();
@@ -584,13 +623,15 @@ public class CCVideoView extends FrameLayout
      * release the media player in any state
      */
     private void release(boolean cleartargetstate) {
+        Log.d(TAG, "[Ciel_Debug] #release()#: cleartargetstate: " + cleartargetstate);
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
-            mCurrentState = IMediaPlayer.STATE_IDLE;
+            mCurrentState = STATE_IDLE;
             if (cleartargetstate) {
-                mTargetState = IMediaPlayer.STATE_IDLE;
+                Log.d(TAG, "[Ciel_Debug] #release()#: set TargetState STATE_IDLE");
+                mTargetState = STATE_IDLE;
             }
             if (mAudioFocusType != AudioManager.AUDIOFOCUS_NONE) {
                 mAudioManager.abandonAudioFocus(null);
@@ -600,11 +641,11 @@ public class CCVideoView extends FrameLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN
+        if (ev.getAction() == MotionEvent.ACTION_UP
                 && isInPlaybackState() && mMediaController != null) {
             toggleMediaControlsVisiblity();
         }
-        return super.onTouchEvent(ev);
+        return true;
     }
 
     @Override
@@ -668,28 +709,37 @@ public class CCVideoView extends FrameLayout
     @Override
     public void start() {
         if (isInPlaybackState()) {
+            Log.d(TAG, "[Ciel_Debug] #start()#: isInPlaybackState! MediaPlayer#start()");
             mMediaPlayer.start();
-            mCurrentState = IMediaPlayer.STATE_PLAYING;
+            mCurrentState = STATE_PLAYING;
         }
-        mTargetState = IMediaPlayer.STATE_PLAYING;
+        Log.d(TAG, "[Ciel_Debug] #start()#: set TargetState STATE_PLAYING");
+        mTargetState = STATE_PLAYING;
+        if (mMediaController != null) {
+            mMediaController.show();
+        }
     }
 
     @Override
     public void pause() {
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
+                Log.d(TAG, "[Ciel_Debug] #pause()#: isInPlaybackState! MediaPlayer#pause()");
                 mMediaPlayer.pause();
-                mCurrentState = IMediaPlayer.STATE_PAUSED;
+                mCurrentState = STATE_PAUSED;
             }
         }
-        mTargetState = IMediaPlayer.STATE_PAUSED;
+        Log.d(TAG, "[Ciel_Debug] #pause()#: set TargetState STATE_PAUSED");
+        mTargetState = STATE_PAUSED;
     }
 
     public void suspend() {
+        Log.d(TAG, "[Ciel_Debug] #suspend()#: release(false)");
         release(false);
     }
 
     public void resume() {
+        Log.d(TAG, "[Ciel_Debug] #resume()#: openVideo()");
         openVideo();
     }
 
@@ -698,7 +748,6 @@ public class CCVideoView extends FrameLayout
         if (isInPlaybackState()) {
             return mMediaPlayer.getDuration();
         }
-
         return -1;
     }
 
@@ -713,9 +762,11 @@ public class CCVideoView extends FrameLayout
     @Override
     public void seekTo(int msec) {
         if (isInPlaybackState()) {
+            Log.d(TAG, "[Ciel_Debug] #seekTo()#: isInPlaybackState and MediaPlayer#seekTo(): " + msec);
             mMediaPlayer.seekTo(msec);
             mSeekWhenPrepared = 0;
         } else {
+            Log.d(TAG, "[Ciel_Debug] #seekTo()#: set SeekWhenPrepared: " + msec);
             mSeekWhenPrepared = msec;
         }
     }
@@ -735,9 +786,9 @@ public class CCVideoView extends FrameLayout
 
     private boolean isInPlaybackState() {
         return (mMediaPlayer != null &&
-                mCurrentState != IMediaPlayer.STATE_ERROR &&
-                mCurrentState != IMediaPlayer.STATE_IDLE &&
-                mCurrentState != IMediaPlayer.STATE_PREPARING);
+                mCurrentState != STATE_ERROR &&
+                mCurrentState != STATE_IDLE &&
+                mCurrentState != STATE_PREPARING);
     }
 
     @Override

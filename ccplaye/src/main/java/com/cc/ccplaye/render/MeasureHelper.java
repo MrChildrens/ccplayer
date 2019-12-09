@@ -1,6 +1,8 @@
-package com.cc.ccplaye;
+package com.cc.ccplaye.render;
 
 import android.view.View;
+
+import com.cc.ccplaye.IMediaPlayer;
 
 
 public final class MeasureHelper {

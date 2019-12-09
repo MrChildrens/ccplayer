@@ -24,9 +24,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -50,27 +49,27 @@ import java.util.Locale;
  * <p>
  * Functions like show() and hide() have no effect when MediaController
  * is created in an xml layout.
- *
+ * <p>
  * MediaController will hide and
  * show the buttons according to these rules:
  * <ul>
  * <li> The "previous" and "next" buttons are hidden until setPrevNextListeners()
- *   has been called
+ * has been called
  * <li> The "previous" and "next" buttons are visible but disabled if
- *   setPrevNextListeners() was called with null listeners
+ * setPrevNextListeners() was called with null listeners
  * <li> The "rewind" and "fastforward" buttons are shown unless requested
- *   otherwise by using the MediaController(Context, boolean) constructor
- *   with the boolean set to false
+ * otherwise by using the MediaController(Context, boolean) constructor
+ * with the boolean set to false
  * </ul>
  */
-public class CCMediaController extends FrameLayout {
+public abstract class MediaController extends FrameLayout {
 
     private MediaPlayerControl mPlayer;
     private final Context mContext;
     private View mRoot;
-    private ProgressBar mProgress;
-    private TextView mEndTime;
-    private TextView mCurrentTime;
+    private View mProgress;
+    private View mEndTime;
+    private View mCurrentTime;
     private boolean mShowing;
     private boolean mDragging;
     private static final int sDefaultTimeout = 10000;
@@ -80,15 +79,33 @@ public class CCMediaController extends FrameLayout {
     private View.OnClickListener mNextListener, mPrevListener;
     StringBuilder mFormatBuilder;
     Formatter mFormatter;
-    private ImageButton mPauseButton;
-    private ImageButton mFfwdButton;
-    private ImageButton mRewButton;
-    private ImageButton mNextButton;
-    private ImageButton mPrevButton;
+    private View mPauseButton;
+    private View mFfwdButton;
+    private View mRewButton;
+    private View mNextButton;
+    private View mPrevButton;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
 
-    public CCMediaController(Context context, AttributeSet attrs) {
+    protected abstract int getRootViewId();
+
+    protected abstract int getPauseId();
+
+    protected abstract int getFfwdId();
+
+    protected abstract int getRewId();
+
+    protected abstract int getNextId();
+
+    protected abstract int getPrevId();
+
+    protected abstract int getProgressId();
+
+    protected abstract int getEndTimeId();
+
+    protected abstract int getCurrentTimeId();
+
+    public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRoot = this;
         mContext = context;
@@ -104,27 +121,15 @@ public class CCMediaController extends FrameLayout {
         }
     }
 
-    public CCMediaController(Context context, boolean useFastForward) {
+    public MediaController(Context context, boolean useFastForward) {
         super(context);
         mContext = context;
         mUseFastForward = useFastForward;
     }
 
-    public CCMediaController(Context context) {
+    public MediaController(Context context) {
         this(context, true);
     }
-
-    private final OnTouchListener mTouchListener = new OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (mShowing) {
-                    hide();
-                }
-            }
-            return false;
-        }
-    };
 
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
@@ -136,27 +141,34 @@ public class CCMediaController extends FrameLayout {
      * This can for example be a VideoView, or your Activity's main view.
      * When VideoView calls this method, it will use the VideoView's parent
      * as the anchor.
+     *
      * @param view The view to which to anchor the controller when it is visible.
      */
 
     private boolean isAddToVideoView = false;
+
     public void setAnchorView(FrameLayout view) {
         makeControllerView(view);
         show(10000);
-//        updatePausePlay();
     }
 
     /**
      * Create the view that holds the widgets that control playback.
      * Derived classes can override this to create their own.
+     *
      * @return The controller view.
      * @hide This doesn't work as advertised
      */
     protected View makeControllerView(FrameLayout view) {
         if (!isAddToVideoView) {
-            LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mRoot = inflate.inflate(R.layout.custom_media_controller, null);
-            setOnTouchListener(mTouchListener);
+            int rootId = getRootViewId();
+            if (rootId <= 0) {
+                rootId = R.layout.custom_media_controller;
+            }
+//            LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//            mRoot = inflate.inflate(rootId, null);
+
+            mRoot = LayoutInflater.from(mContext).inflate(rootId, this, true);
             initControllerView(mRoot);
 
             FrameLayout.LayoutParams frameParams = new FrameLayout.LayoutParams(
@@ -177,13 +189,13 @@ public class CCMediaController extends FrameLayout {
                 .getText(R.string.lockscreen_transport_play_description);
         mPauseDescription = res
                 .getText(R.string.lockscreen_transport_pause_description);
-        mPauseButton = v.findViewById(R.id.pause);
+        mPauseButton = v.findViewById(getPauseId());
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
 
-        mFfwdButton = v.findViewById(R.id.ffwd);
+        mFfwdButton = v.findViewById(getFfwdId());
         if (mFfwdButton != null) {
             mFfwdButton.setOnClickListener(mFfwdListener);
             if (!mFromXml) {
@@ -191,7 +203,7 @@ public class CCMediaController extends FrameLayout {
             }
         }
 
-        mRewButton = v.findViewById(R.id.rew);
+        mRewButton = v.findViewById(getRewId());
         if (mRewButton != null) {
             mRewButton.setOnClickListener(mRewListener);
             if (!mFromXml) {
@@ -200,26 +212,28 @@ public class CCMediaController extends FrameLayout {
         }
 
         // By default these are hidden. They will be enabled when setPrevNextListeners() is called
-        mNextButton = v.findViewById(R.id.next);
+        mNextButton = v.findViewById(getNextId());
         if (mNextButton != null && !mFromXml && !mListenersSet) {
             mNextButton.setVisibility(View.GONE);
         }
-        mPrevButton = v.findViewById(R.id.prev);
+        mPrevButton = v.findViewById(getPrevId());
         if (mPrevButton != null && !mFromXml && !mListenersSet) {
             mPrevButton.setVisibility(View.GONE);
         }
 
-        mProgress = v.findViewById(R.id.mediacontroller_progress);
+        mProgress = v.findViewById(getProgressId());
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;
                 seeker.setOnSeekBarChangeListener(mSeekListener);
             }
-            mProgress.setMax(1000);
+            if (mProgress instanceof ProgressBar) {
+                ((ProgressBar) mProgress).setMax(1000);
+            }
         }
 
-        mEndTime = v.findViewById(R.id.time);
-        mCurrentTime = v.findViewById(R.id.time_current);
+        mEndTime = v.findViewById(getEndTimeId());
+        mCurrentTime = v.findViewById(getCurrentTimeId());
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
@@ -270,10 +284,14 @@ public class CCMediaController extends FrameLayout {
     /**
      * Show the controller on screen. It will go away
      * automatically after 'timeout' milliseconds of inactivity.
+     *
      * @param timeout The timeout in milliseconds. Use 0 to show
-     * the controller until hide() is called.
+     *                the controller until hide() is called.
      */
     public void show(int timeout) {
+        if (mRoot == null) {
+            return;
+        }
         if (!mShowing) {
             setProgress();
             if (mPauseButton != null) {
@@ -304,7 +322,8 @@ public class CCMediaController extends FrameLayout {
      * Remove the controller from the screen.
      */
     public void hide() {
-        if (mShowing) {
+
+        if (mShowing && mRoot != null) {
             try {
                 mRoot.removeCallbacks(mShowProgress);
                 mRoot.setVisibility(View.GONE);
@@ -326,8 +345,9 @@ public class CCMediaController extends FrameLayout {
         @Override
         public void run() {
             int pos = setProgress();
-            if (!mDragging && mShowing && mPlayer.isPlaying()) {
+            if (!mDragging && mShowing && mPlayer.isPlaying() && mRoot != null) {
                 mRoot.postDelayed(mShowProgress, 1000 - (pos % 1000));
+                updatePausePlay();
             }
         }
     };
@@ -337,7 +357,7 @@ public class CCMediaController extends FrameLayout {
 
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
-        int hours   = totalSeconds / 3600;
+        int hours = totalSeconds / 3600;
 
         mFormatBuilder.setLength(0);
         if (hours > 0) {
@@ -357,17 +377,21 @@ public class CCMediaController extends FrameLayout {
             if (duration > 0) {
                 // use long to avoid overflow
                 long pos = 1000L * position / duration;
-                mProgress.setProgress( (int) pos);
+                if (mProgress instanceof ProgressBar) {
+                    ((ProgressBar) mProgress).setProgress((int) pos);
+                }
             }
             int percent = mPlayer.getBufferPercentage();
-            mProgress.setSecondaryProgress(percent * 10);
+            if (mProgress instanceof ProgressBar) {
+                ((ProgressBar) mProgress).setSecondaryProgress(percent * 10);
+            }
         }
 
-        if (mEndTime != null) {
-            mEndTime.setText(stringForTime(duration));
+        if (mEndTime != null && mEndTime instanceof TextView) {
+            ((TextView) mEndTime).setText(stringForTime(duration));
         }
-        if (mCurrentTime != null) {
-            mCurrentTime.setText(stringForTime(position));
+        if (mCurrentTime != null && mCurrentTime instanceof TextView) {
+            ((TextView) mCurrentTime).setText(stringForTime(position));
         }
 
         return position;
@@ -377,13 +401,17 @@ public class CCMediaController extends FrameLayout {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                show(0); // show until hide is called
+//                show(0); // show until hide is called
                 break;
             case MotionEvent.ACTION_UP:
-                show(sDefaultTimeout); // start timeout
+                if (!isShowing()) {
+                    show(sDefaultTimeout); // start timeout
+                } else {
+                    hide();
+                }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                hide();
+//                hide();
                 break;
             default:
                 break;
@@ -402,7 +430,7 @@ public class CCMediaController extends FrameLayout {
         int keyCode = event.getKeyCode();
         final boolean uniqueDown = event.getRepeatCount() == 0
                 && event.getAction() == KeyEvent.ACTION_DOWN;
-        if (keyCode ==  KeyEvent.KEYCODE_HEADSETHOOK
+        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK
                 || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
                 || keyCode == KeyEvent.KEYCODE_SPACE) {
             if (uniqueDown) {
@@ -453,19 +481,24 @@ public class CCMediaController extends FrameLayout {
         }
     };
 
-    private static final String TAG = CCMediaController.class.getSimpleName();
+    private static final String TAG = MediaController.class.getSimpleName();
 
     private void updatePausePlay() {
         if (mRoot == null || mPauseButton == null) {
             return;
         }
-        Log.d(TAG, "updatePausePlay: " + mPlayer.isPlaying());
+        int icPause = android.R.drawable.ic_media_pause;
+        int icPlay = android.R.drawable.ic_media_play;
         if (mPlayer.isPlaying()) {
-            mPauseButton.setImageResource(android.R.drawable.ic_media_pause);
-            mPauseButton.setContentDescription(mPauseDescription);
+            if (mPauseButton instanceof ImageView) {
+                ((ImageView) mPauseButton).setImageResource(icPause);
+                mPauseButton.setContentDescription(mPauseDescription);
+            }
         } else {
-            mPauseButton.setImageResource(android.R.drawable.ic_media_play);
-            mPauseButton.setContentDescription(mPlayDescription);
+            if (mPauseButton instanceof ImageView) {
+                ((ImageView) mPauseButton).setImageResource(icPlay);
+                mPauseButton.setContentDescription(mPlayDescription);
+            }
         }
     }
 
@@ -501,7 +534,9 @@ public class CCMediaController extends FrameLayout {
             // the seekbar and b) once the user is done dragging the thumb
             // we will post one of these messages to the queue again and
             // this ensures that there will be exactly one message queued up.
-            mRoot.removeCallbacks(mShowProgress);
+            if (mRoot != null) {
+                mRoot.removeCallbacks(mShowProgress);
+            }
         }
 
         @Override
@@ -514,9 +549,9 @@ public class CCMediaController extends FrameLayout {
 
             long duration = mPlayer.getDuration();
             long newposition = (duration * progress) / 1000L;
-            mPlayer.seekTo( (int) newposition);
-            if (mCurrentTime != null) {
-                mCurrentTime.setText(stringForTime((int) newposition));
+            mPlayer.seekTo((int) newposition);
+            if (mCurrentTime != null && mCurrentTime instanceof TextView) {
+                ((TextView) mCurrentTime).setText(stringForTime((int) newposition));
             }
         }
 
@@ -530,7 +565,9 @@ public class CCMediaController extends FrameLayout {
             // Ensure that progress is properly updated in the future,
             // the call to show() does not guarantee this because it is a
             // no-op if we are already showing.
-            mRoot.post(mShowProgress);
+            if (mRoot != null) {
+                mRoot.post(mShowProgress);
+            }
         }
     };
 
@@ -560,7 +597,7 @@ public class CCMediaController extends FrameLayout {
 
     @Override
     public CharSequence getAccessibilityClassName() {
-        return CCMediaController.class.getName();
+        return MediaController.class.getName();
     }
 
     private final View.OnClickListener mRewListener = new View.OnClickListener() {
@@ -617,22 +654,32 @@ public class CCMediaController extends FrameLayout {
     }
 
     public interface MediaPlayerControl {
-        void    start();
-        void    pause();
-        int     getDuration();
-        int     getCurrentPosition();
-        void    seekTo(int pos);
+        void start();
+
+        void pause();
+
+        int getDuration();
+
+        int getCurrentPosition();
+
+        void seekTo(int pos);
+
         boolean isPlaying();
-        int     getBufferPercentage();
+
+        int getBufferPercentage();
+
         boolean canPause();
+
         boolean canSeekBackward();
+
         boolean canSeekForward();
 
         /**
          * Get the audio session id for the player used by this VideoView. This can be used to
          * apply audio effects to the audio track of a video.
+         *
          * @return The audio session, or 0 if there was an error.
          */
-        int     getAudioSessionId();
+        int getAudioSessionId();
     }
 }
