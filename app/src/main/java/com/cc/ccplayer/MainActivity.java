@@ -10,8 +10,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.cc.ccplaye.IMediaPlayer;
-import com.cc.ccplaye.MediaController;
-import com.cc.ccplaye.MyMediaController;
 import com.cc.ccplaye.VideoView;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mVideoView = findViewById(R.id.videoview_play);
-        MyMediaController mediaController = new MyMediaController(this);
+        MyMediaController mediaController = new MyMediaController(this, true);
         mVideoView.setMediaController(mediaController);
 
         String uri = ("https://mov.bn.netease.com/open-movie/nos/mp4/2016/01/11/SBC46Q9DV_hd.mp4");

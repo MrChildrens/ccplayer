@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/iv_exit"
+        android:layout_width="@dimen/play_back_icon_width"
+        android:layout_height="@dimen/play_back_icon_height"
+        android:contentDescription="@null"
+        android:scaleType="centerInside"
+        android:src="@drawable/play_icon_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_play_or_pause"
+        android:layout_width="@dimen/play_icon_size"
+        android:layout_height="@dimen/play_icon_size"
+        android:contentDescription="@null"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_rewind"
+        android:layout_width="@dimen/play_icon_size"
+        android:layout_height="@dimen/play_icon_size"
+        android:layout_marginEnd="@dimen/play_icon_hori_spacing"
+        android:contentDescription="@null"
+        android:src="@drawable/play_icon_rewind"
+        app:layout_constraintEnd_toStartOf="@id/iv_play_or_pause"
+        app:layout_constraintTop_toTopOf="@id/iv_play_or_pause" />
+
+    <ImageView
+        android:id="@+id/iv_forward"
+        android:layout_width="@dimen/play_icon_size"
+        android:layout_height="@dimen/play_icon_size"
+        android:layout_marginStart="@dimen/play_icon_hori_spacing"
+        android:contentDescription="@null"
+        android:src="@drawable/play_icon_forward"
+        app:layout_constraintStart_toEndOf="@id/iv_play_or_pause"
+        app:layout_constraintTop_toTopOf="@id/iv_play_or_pause" />
+
+    <ImageView
+        android:id="@+id/iv_previous_episode"
+        android:layout_width="@dimen/play_icon_size"
+        android:layout_height="@dimen/play_icon_size"
+        android:layout_marginEnd="@dimen/play_icon_hori_spacing"
+        android:contentDescription="@null"
+        android:src="@drawable/play_icon_previous_episode"
+        app:layout_constraintEnd_toStartOf="@id/iv_rewind"
+        app:layout_constraintTop_toTopOf="@id/iv_play_or_pause" />
+
+    <ImageView
+        android:id="@+id/iv_next_episode"
+        android:layout_width="@dimen/play_icon_size"
+        android:layout_height="@dimen/play_icon_size"
+        android:layout_marginStart="@dimen/play_icon_hori_spacing"
+        android:contentDescription="@null"
+        android:src="@drawable/play_icon_next_episode"
+        app:layout_constraintStart_toEndOf="@id/iv_forward"
+        app:layout_constraintTop_toTopOf="@id/iv_play_or_pause" />
+
+    <TextView
+        android:id="@+id/tv_starttime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/play_starttime_margin_start"
+        android:layout_marginBottom="@dimen/play_starttime_margin_bottom"
+        android:textColor="@color/text_color_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seekbar_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:maxHeight="@dimen/play_seekbar_max_height"
+        android:progressDrawable="@drawable/seekbar_progress_drawable"
+        android:thumb="@drawable/seekbar_thumb_bg"
+        app:layout_constraintBottom_toBottomOf="@id/tv_starttime"
+        app:layout_constraintEnd_toStartOf="@id/tv_endtime"
+        app:layout_constraintStart_toEndOf="@id/tv_starttime" />
+
+    <TextView
+        android:id="@+id/tv_endtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_color_3"
+        app:layout_constraintBaseline_toBaselineOf="@id/tv_starttime"
+        app:layout_constraintBottom_toBottomOf="@id/tv_starttime"
+        app:layout_constraintEnd_toStartOf="@id/iv_switch_screen" />
+
+    <androidx.constraintlayout.widget.Group
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="tv_starttime,seekbar_progress,tv_endtime,iv_play_or_pause,iv_forward,iv_rewind,iv_next_episode,iv_previous_episode" />
+
+    <ImageView
+        android:id="@+id/iv_switch_screen"
+        android:layout_width="@dimen/play_switch_screen_icon_width"
+        android:layout_height="@dimen/play_switch_screen_icon_height"
+        android:contentDescription="@null"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

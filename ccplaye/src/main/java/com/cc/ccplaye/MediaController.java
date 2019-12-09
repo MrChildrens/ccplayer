@@ -72,7 +72,7 @@ public abstract class MediaController extends FrameLayout {
     private View mCurrentTime;
     private boolean mShowing;
     private boolean mDragging;
-    private static final int sDefaultTimeout = 10000;
+    private int sDefaultTimeout = 10000;
     private final boolean mUseFastForward;
     private boolean mFromXml;
     private boolean mListenersSet;
@@ -84,12 +84,18 @@ public abstract class MediaController extends FrameLayout {
     private View mRewButton;
     private View mNextButton;
     private View mPrevButton;
+    private View mExitButton;
+    private View mFullScreenButton;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
 
     protected abstract int getRootViewId();
 
     protected abstract int getPauseId();
+
+    protected abstract int getPauseIconId();
+
+    protected abstract int getPlayIconId();
 
     protected abstract int getFfwdId();
 
@@ -104,6 +110,14 @@ public abstract class MediaController extends FrameLayout {
     protected abstract int getEndTimeId();
 
     protected abstract int getCurrentTimeId();
+
+    protected abstract int getExitId();
+
+    protected abstract int getFullScreenId();
+
+    protected abstract int getFullIconId();
+
+    protected abstract int getScreenIconId();
 
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -237,6 +251,11 @@ public abstract class MediaController extends FrameLayout {
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
+        mExitButton = v.findViewById(getExitId());
+        mFullScreenButton = v.findViewById(getFullScreenId());
+        if (mFullScreenButton instanceof ImageView) {
+            ((ImageView)mFullScreenButton).setImageResource(getFullIconId());
+        }
         installPrevNextListeners();
     }
 
@@ -487,8 +506,15 @@ public abstract class MediaController extends FrameLayout {
         if (mRoot == null || mPauseButton == null) {
             return;
         }
-        int icPause = android.R.drawable.ic_media_pause;
-        int icPlay = android.R.drawable.ic_media_play;
+        int icPause = getPauseIconId();
+        if (icPause <= 0) {
+            icPause = android.R.drawable.ic_media_pause;
+        }
+
+        int icPlay = getPlayIconId();
+        if (icPlay <= 0) {
+            icPlay = android.R.drawable.ic_media_pause;
+        }
         if (mPlayer.isPlaying()) {
             if (mPauseButton instanceof ImageView) {
                 ((ImageView) mPauseButton).setImageResource(icPause);

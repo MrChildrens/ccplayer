@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--common-->
+    <dimen name="line_height_small">1dp</dimen>
+    <dimen name="loading_view_radius">5dp</dimen>
+    <!--common-->
+
+    <!--titlebar-->
+    <dimen name="titlebar_title_textsize">18sp</dimen>
+
+    <dimen name="titlebar_height">70dp</dimen>
+    <dimen name="titlebar_left_btn_width">50dp</dimen>
+    <!--titlebar-->
+
+    <!--select language-->
+    <dimen name="select_language_tip_margin_start">5dp</dimen>
+    <dimen name="select_language_tip_margin_top">5dp</dimen>
+    <dimen name="select_language_btn_width">320dp</dimen>
+    <dimen name="select_language_btn_height">45dp</dimen>
+    <dimen name="select_language_btn_margin_top">20dp</dimen>>
+    <dimen name="select_language_btn_radius">5dp</dimen>
+    <dimen name="select_language_save_btn_radius">20dp</dimen>
+    <dimen name="select_language_save_btn_stroke_width">0dp</dimen>
+    <!--select language-->
+
+    <!--home-->
+    <dimen name="home_live_item_title_textsize">16sp</dimen>
+    <dimen name="home_vod_item_name_textsize">14sp</dimen>
+    <dimen name="home_vod_hori_item_name_textsize">12sp</dimen>
+    <dimen name="home_vod_hori_item_summary_textsize">12sp</dimen>
+    <dimen name="home_navigation_title_textsize">12sp</dimen>
+
+    <dimen name="home_titlebar_icon_width">100dp</dimen>
+    <dimen name="home_titlebar_icon_height">36dp</dimen>
+    <dimen name="home_titlebar_icon_margin_start">20dp</dimen>
+    <dimen name="home_titlebar_icon_margin_top">16dp</dimen>
+    <dimen name="home_titlebar_profile_icon_width">56dp</dimen>
+    <dimen name="home_titlebar_profile_icon_height">70dp</dimen>
+    <dimen name="home_titlebar_profile_icon_margin_end">20dp</dimen>
+    <dimen name="home_navigation_height">56dp</dimen>
+    <dimen name="home_navigation_icon_width">21dp</dimen>
+    <dimen name="home_navigation_icon_height">21dp</dimen>
+    <dimen name="home_live_recyclerview_margin_start">12dp</dimen>
+    <dimen name="home_live_recyclerview_margin_end">12dp</dimen>
+    <dimen name="home_live_item_height">65dp</dimen>
+    <dimen name="home_live_item_icon_width">70dp</dimen>
+    <dimen name="home_live_item_icon_height">56dp</dimen>
+    <dimen name="home_live_item_icon_margin_end">12dp</dimen>
+    <dimen name="home_vod_item_split_line_width">6dp</dimen>
+    <dimen name="home_vod_item_split_line_height">27dp</dimen>
+    <dimen name="home_vod_item_split_line_margin_start">12dp</dimen>
+    <dimen name="home_vod_item_split_line_margin_top">10dp</dimen>
+    <dimen name="home_vod_item_name_margin_start">12dp</dimen>
+    <dimen name="home_vod_item_recyclerview_margin_start">6dp</dimen>
+    <dimen name="home_vod_item_recyclerview_margin_end">6dp</dimen>
+    <dimen name="home_vod_item_recyclerview_margin_top">10dp</dimen>
+    <dimen name="home_vod_item_recyclerview_margin_bottom">0dp</dimen>
+    <dimen name="home_vod_hori_item_width">116dp</dimen>
+    <dimen name="home_vod_hori_item_icon_width">104dp</dimen>
+    <dimen name="home_vod_hori_item_name_padding_vertical">3dp</dimen>
+    <!--home-->
+
+    <!--profile-->
+    <dimen name="profile_item_name_text_size">14sp</dimen>
+    <dimen name="profile_item_right_text_text_size">14sp</dimen>
+    <dimen name="profile_recycler_margin_start">12dp</dimen>
+    <dimen name="profile_recycler_margin_end">12dp</dimen>
+    <dimen name="profile_item_height">64dp</dimen>
+    <dimen name="profile_item_left_icon_width">21dp</dimen>
+    <dimen name="profile_item_left_icon_height">21dp</dimen>
+    <dimen name="profile_item_left_icon_margin_start">8dp</dimen>
+    <dimen name="profile_item_name_margin_start">8dp</dimen>
+    <dimen name="profile_item_go_width">16dp</dimen>
+    <dimen name="profile_item_go_height">16dp</dimen>
+    <dimen name="profile_item_go_margin_end">8dp</dimen>
+    <!--profile-->
+
+    <!--play-->
+    <dimen name="live_channel_name_size">14sp</dimen>
+
+    <dimen name="live_logo_width">68dp</dimen>
+    <dimen name="live_logo_height">44dp</dimen>
+    <dimen name="live_logo_margin_start">10dp</dimen>
+    <dimen name="live_logo_margin_top">10dp</dimen>
+    <dimen name="live_channel_margin_end">10dp</dimen>
+    <dimen name="live_line_margin_bottom">10dp</dimen>
+    <dimen name="play_back_icon_width">36dp</dimen>
+    <dimen name="play_back_icon_height">36dp</dimen>
+    <dimen name="play_switch_screen_icon_width">36dp</dimen>
+    <dimen name="play_switch_screen_icon_height">36dp</dimen>
+    <dimen name="play_starttime_margin_bottom">8dp</dimen>
+    <dimen name="play_starttime_margin_start">12dp</dimen>
+    <dimen name="play_icon_size">29dp</dimen>
+    <dimen name="play_icon_hori_spacing">8dp</dimen>
+    <dimen name="play_seekbar_max_height">4dp</dimen>
+    <dimen name="play_seekbar_bg_radius">5dp</dimen>
+    <dimen name="play_seekbar_bg_height">3dp</dimen>
+    <dimen name="play_seekbar_second_progress_radius">5dp</dimen>
+    <dimen name="play_seekbar_second_progress_height">3dp</dimen>
+    <dimen name="play_seekbar_progress_radius">5dp</dimen>
+    <dimen name="play_seekbar_progress_height">3dp</dimen>
+    <dimen name="play_seekbar_thumb_width">15dp</dimen>
+    <dimen name="play_seekbar_thumb_height">15dp</dimen>
+    <!--play-->
+
+    <!--epg-->
+    <dimen name="epg_list_starttime_size">14sp</dimen>
+    <dimen name="epg_list_title_textsize">14sp</dimen>
+
+    <dimen name="epg_indicator_height">26dp</dimen>
+    <dimen name="epg_indicator_margin_top">10dp</dimen>
+    <dimen name="epg_indicator_item_radius">15dp</dimen>
+    <dimen name="epg_indicator_item_stroke_width">1dp</dimen>
+    <dimen name="epg_indicator_item_hori_margin">10dp</dimen>
+    <dimen name="epg_indicator_item_hori_padding">9dp</dimen>
+    <dimen name="epg_indicator_item_vertical_padding">3dp</dimen>
+    <dimen name="epg_viewpager_margin_top">10dp</dimen>
+    <dimen name="epg_list_item_height">36dp</dimen>
+    <dimen name="epg_list_starttime_margin_start">16dp</dimen>
+    <dimen name="epg_list_vertical_dashed_margin_start">22dp</dimen>
+    <dimen name="epg_list_vertical_dashed_left">-300dp</dimen>
+    <dimen name="epg_list_vertical_dashed_right">-300dp</dimen>
+    <dimen name="epg_list_dashed_width">1dp</dimen>
+    <dimen name="epg_list_dashed_dashwidth">3dp</dimen>
+    <dimen name="epg_list_dashed_dashgap">3dp</dimen>
+    <dimen name="epg_list_item_status_icon_stroke_width">1dp</dimen>
+    <dimen name="epg_list_item_status_icon_width">5dp</dimen>
+    <dimen name="epg_list_item_status_icon_height">5dp</dimen>
+    <dimen name="epg_list_title_margin_start">22dp</dimen>
+    <dimen name="epg_list_live_icon_margin_end">16dp</dimen>
+    <dimen name="epg_list_live_icon_radius">20dp</dimen>
+    <dimen name="epg_list_live_icon_hori_padding">20dp</dimen>
+    <!--epg-->
+
+    <!--vod-->
+    <dimen name="vod_summary_textsize">12sp</dimen>
+    <dimen name="vod_title_textsize">14sp</dimen>
+    <dimen name="vod_episode_title_textsize">14sp</dimen>
+    <dimen name="vod_episode_number_textsize">12sp</dimen>
+
+    <dimen name="vod_title_margin_start">12dp</dimen>
+    <dimen name="vod_title_margin_top">22dp</dimen>
+    <dimen name="vod_summary_margin_end">12dp</dimen>
+    <dimen name="vod_summary_spacing">0dp</dimen>
+    <dimen name="vod_summary_margin_top">12dp</dimen>
+    <dimen name="vod_summary_margin_bottom">6dp</dimen>
+    <dimen name="vod_split_line_width">6dp</dimen>
+    <dimen name="vod_split_line_height">27dp</dimen>
+    <dimen name="vod_split_line_margin_start">8dp</dimen>
+    <dimen name="vod_episode_title_margin_start">12dp</dimen>
+    <dimen name="vod_episode_recyclerview_margin_start">6dp</dimen>
+    <dimen name="vod_episode_recyclerview_margin_top">10dp</dimen>
+    <dimen name="vod_episode_recyclerview_margint_end">6dp</dimen>
+    <dimen name="vod_episode_item_width">116dp</dimen>
+    <dimen name="vod_episode_post_width">104dp</dimen>
+    <dimen name="vod_episode_playing_icon_width">29dp</dimen>
+    <dimen name="vod_episode_playing_icon_height">29dp</dimen>
+    <dimen name="vod_episode_number_margin_start">6dp</dimen>
+    <dimen name="vod_episode_number_maring_bottom">8dp</dimen>
+    <!--vod-->
+
+    <!--about-->
+    <dimen name="about_logo_icon_height">36dp</dimen>
+    <dimen name="about_logo_icon_margin_start">20dp</dimen>
+    <dimen name="about_logo_icon_margin_top">40dp</dimen>
+    <dimen name="about_appname_margin_top">30dp</dimen>
+    <dimen name="about_normal_margin_vertical">12dp</dimen>
+    <!--about-->
+</resources>
