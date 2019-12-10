@@ -15,6 +15,7 @@ import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -23,9 +24,9 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-
 import com.cc.ccplaye.android.AndroidMediaPlayer;
+import com.cc.ccplaye.ijkplayer.IjkPlayer;
+import com.cc.ccplaye.utils.Constant;
 import com.cc.ccplaye.utils.render.SurfaceRenderView;
 
 import java.io.IOException;
@@ -299,8 +300,8 @@ public class VideoView extends FrameLayout
         }
 
         try {
-            mMediaPlayer = new AndroidMediaPlayer();
-//            mMediaPlayer = new IjkPlayer(mContext);
+//            mMediaPlayer = new AndroidMediaPlayer();
+            createPlayer();
 
             if (mAudioSession != 0) {
                 mMediaPlayer.setAudioSessionId(mAudioSession);
@@ -339,6 +340,21 @@ public class VideoView extends FrameLayout
         } finally {
 
         }
+    }
+
+    private void createPlayer() {
+        switch (BuildConfig.PLAYER_TYPE) {
+            case Constant.PLAYER_ANDROID:
+                mMediaPlayer = new AndroidMediaPlayer();
+                break;
+            case Constant.PLAYER_IJK:
+                mMediaPlayer = new IjkPlayer(mContext);
+                break;
+            default:
+                mMediaPlayer = new IjkPlayer(mContext);
+                break;
+        }
+
     }
 
     public void setMediaController(IMediaController controller) {
@@ -824,7 +840,7 @@ public class VideoView extends FrameLayout
 
     @Override
     public boolean next() {
-        if (mPaths != null && mPaths.length  > 0 && mIndex < mPaths.length - 1) {
+        if (mPaths != null && mPaths.length > 0 && mIndex < mPaths.length - 1) {
             mIndex++;
             Log.d(TAG, "[Ciel_Debug] #next()#: " + mIndex);
             setVideoPath(mPaths[mIndex]);
@@ -836,7 +852,7 @@ public class VideoView extends FrameLayout
 
     @Override
     public boolean previous() {
-        if (mPaths != null && mPaths.length  > 0 && mIndex > 0) {
+        if (mPaths != null && mPaths.length > 0 && mIndex > 0) {
             mIndex--;
             Log.d(TAG, "[Ciel_Debug] #previous()#: " + mIndex);
             setVideoPath(mPaths[mIndex]);

@@ -19,6 +19,8 @@ package com.cc.ccplaye;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -33,9 +35,6 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.cc.ccplaye.utils.ScreenUtil;
 
@@ -193,7 +192,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
 
             int rootId = getRootViewId();
             if (rootId <= 0) {
-                rootId = R.layout.custom_media_controller;
+                rootId = R.layout.media_controller;
             }
 
             mRoot = LayoutInflater.from(mContext).inflate(rootId, this, true);
