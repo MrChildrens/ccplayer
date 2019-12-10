@@ -3,6 +3,9 @@ package com.cc.ccplayer;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.cc.ccplaye.MediaController;
 
 /**
@@ -11,18 +14,27 @@ import com.cc.ccplaye.MediaController;
  */
 public class MyMediaController extends MediaController {
 
-    public MyMediaController(Context context, AttributeSet attrs) {
+    public MyMediaController(@NonNull Context context) {
+        super(context);
+    }
+
+    public MyMediaController(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public MyMediaController(Context context, boolean useFastForward) {
-        super(context, useFastForward);
+    public MyMediaController(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
-    public MyMediaController(Context context) {
-        super(context);
+    public MyMediaController(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
-    
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+    }
+
     @Override
     protected int getRootViewId() {
         return R.layout.apstar_controller;
@@ -96,5 +108,30 @@ public class MyMediaController extends MediaController {
     @Override
     protected int getScreenIconId() {
         return R.drawable.play_icon_switch_window;
+    }
+
+    @Override
+    public boolean getUsePause() {
+        return true;
+    }
+
+    @Override
+    public boolean getUseFastForward() {
+        return true;
+    }
+
+    @Override
+    public boolean getUsePrevNext() {
+        return true;
+    }
+
+    @Override
+    public boolean getUseTime() {
+        return true;
+    }
+
+    @Override
+    public boolean getUseSeek() {
+        return true;
     }
 }

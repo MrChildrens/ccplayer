@@ -1,4 +1,4 @@
-package com.cc.ccplaye.render;
+package com.cc.ccplaye.utils.render;
 
 import android.annotation.TargetApi;
 import android.content.Context;

@@ -21,21 +21,20 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 public class IjkPlayer extends BaseMediaPlayer {
 
     private IjkMediaPlayer mIjkMediaPlayer;
-    private Settings mSettings;
 
     public IjkPlayer(Context context) {
         mIjkMediaPlayer = new IjkMediaPlayer();
-        mSettings = new Settings(context);
+        Settings settings = new Settings(context);
         IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
 
-        if (mSettings.getUsingMediaCodec()) {
+        if (settings.getUsingMediaCodec()) {
             mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
-            if (mSettings.getUsingMediaCodecAutoRotate()) {
+            if (settings.getUsingMediaCodecAutoRotate()) {
                 mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 1);
             } else {
                 mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
             }
-            if (mSettings.getMediaCodecHandleResolutionChange()) {
+            if (settings.getMediaCodecHandleResolutionChange()) {
                 mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
             } else {
                 mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
@@ -44,13 +43,13 @@ public class IjkPlayer extends BaseMediaPlayer {
             mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
         }
 
-        if (mSettings.getUsingOpenSLES()) {
+        if (settings.getUsingOpenSLES()) {
             mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
         } else {
             mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0);
         }
 
-        String pixelFormat = mSettings.getPixelFormat();
+        String pixelFormat = settings.getPixelFormat();
         if (TextUtils.isEmpty(pixelFormat)) {
             mIjkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_RV32);
         } else {

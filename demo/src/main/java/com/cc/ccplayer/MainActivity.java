@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.cc.ccplaye.IMediaController;
 import com.cc.ccplaye.IMediaPlayer;
 import com.cc.ccplaye.VideoView;
 
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private VideoView mVideoView;
+    private IMediaController mIMediaController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,12 +26,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mVideoView = findViewById(R.id.videoview_play);
-        MyMediaController mediaController = new MyMediaController(this, true);
-        mVideoView.setMediaController(mediaController);
+        mIMediaController = new MyMediaController(this);
+        mVideoView.setMediaController(mIMediaController);
 
-        String uri = ("https://mov.bn.netease.com/open-movie/nos/mp4/2016/01/11/SBC46Q9DV_hd.mp4");
-        mVideoView.setVideoURI(Uri.parse(uri));
-
+        String path = ("https://mov.bn.netease.com/open-movie/nos/mp4/2016/01/11/SBC46Q9DV_hd.mp4");
+        mVideoView.setVideoPaths(new String[] {path , "https://mov.bn.netease.com/open-movie/nos/mp4/2018/01/12/SD70VQJ74_sd.mp4",
+                path , "https://mov.bn.netease.com/open-movie/nos/mp4/2018/01/12/SD70VQJ74_sd.mp4",
+                path , "https://mov.bn.netease.com/open-movie/nos/mp4/2018/01/12/SD70VQJ74_sd.mp4",
+                path , "https://mov.bn.netease.com/open-movie/nos/mp4/2018/01/12/SD70VQJ74_sd.mp4",
+                path , "https://mov.bn.netease.com/open-movie/nos/mp4/2018/01/12/SD70VQJ74_sd.mp4", }, 2);
+        mVideoView.start();
+//        mVideoView.setVideoPaths(path);
         Button button = findViewById(R.id.btn_next);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +81,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoView.start();
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        mIMediaController.toggleScreenOrExit();
     }
 }

@@ -96,10 +96,10 @@
         app:layout_constraintBottom_toBottomOf="@id/tv_starttime"
         app:layout_constraintEnd_toStartOf="@id/iv_switch_screen" />
 
-    <androidx.constraintlayout.widget.Group
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="tv_starttime,seekbar_progress,tv_endtime,iv_play_or_pause,iv_forward,iv_rewind,iv_next_episode,iv_previous_episode" />
+<!--    <androidx.constraintlayout.widget.Group-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:constraint_referenced_ids="tv_starttime,seekbar_progress,tv_endtime,iv_play_or_pause,iv_forward,iv_rewind,iv_next_episode,iv_previous_episode" />-->
 
     <ImageView
         android:id="@+id/iv_switch_screen"

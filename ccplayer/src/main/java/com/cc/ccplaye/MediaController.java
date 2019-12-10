@@ -16,6 +16,7 @@
 
 package com.cc.ccplaye;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
@@ -24,12 +25,19 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.cc.ccplaye.utils.ScreenUtil;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -62,30 +70,38 @@ import java.util.Locale;
  * with the boolean set to false
  * </ul>
  */
-public abstract class MediaController extends FrameLayout {
+public abstract class MediaController extends FrameLayout implements IMediaController {
 
-    private MediaPlayerControl mPlayer;
-    private final Context mContext;
-    private View mRoot;
-    private View mProgress;
-    private View mEndTime;
-    private View mCurrentTime;
+    private static final String TAG = MediaController.class.getSimpleName();
+
+    private static final int DEFAULT_TIMEOUT = 10000;
+
+    private IMediaController.MediaPlayerControl mPlayer;
+    private Context mContext;
+    private Activity mActivity;
+
+    protected View mRoot;
+    protected View mVideoRoot;
+    protected View mProgress;
+    protected View mEndTime;
+    protected View mCurrentTime;
+    protected View mPauseButton;
+    protected View mFfwdButton;
+    protected View mRewButton;
+    protected View mNextButton;
+    protected View mPrevButton;
+    protected View mExitButton;
+    protected View mFullScreenButton;
+
     private boolean mShowing;
     private boolean mDragging;
-    private int sDefaultTimeout = 10000;
-    private final boolean mUseFastForward;
-    private boolean mFromXml;
-    private boolean mListenersSet;
-    private View.OnClickListener mNextListener, mPrevListener;
-    StringBuilder mFormatBuilder;
-    Formatter mFormatter;
-    private View mPauseButton;
-    private View mFfwdButton;
-    private View mRewButton;
-    private View mNextButton;
-    private View mPrevButton;
-    private View mExitButton;
-    private View mFullScreenButton;
+    private boolean mIsFullScreen;
+
+    private int mVideoOldWidth;
+    private int mVideoOldHeight;
+
+    private StringBuilder mFormatBuilder;
+    private Formatter mFormatter;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
 
@@ -119,32 +135,29 @@ public abstract class MediaController extends FrameLayout {
 
     protected abstract int getScreenIconId();
 
-    public MediaController(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mRoot = this;
-        mContext = context;
-        mUseFastForward = true;
-        mFromXml = true;
+    public MediaController(@NonNull Context context) {
+        this(context, null);
     }
 
-    @Override
-    public void onFinishInflate() {
-        super.onFinishInflate();
-        if (mRoot != null) {
-            initControllerView(mRoot);
+    public MediaController(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public MediaController(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public MediaController(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        mRoot = this;
+        mContext = context;
+        if (context instanceof Activity) {
+            mActivity = (Activity) context;
         }
     }
 
-    public MediaController(Context context, boolean useFastForward) {
-        super(context);
-        mContext = context;
-        mUseFastForward = useFastForward;
-    }
 
-    public MediaController(Context context) {
-        this(context, true);
-    }
-
+    @Override
     public void setMediaPlayer(MediaPlayerControl player) {
         mPlayer = player;
         updatePausePlay();
@@ -161,6 +174,7 @@ public abstract class MediaController extends FrameLayout {
 
     private boolean isAddToVideoView = false;
 
+    @Override
     public void setAnchorView(FrameLayout view) {
         makeControllerView(view);
         show(10000);
@@ -175,12 +189,12 @@ public abstract class MediaController extends FrameLayout {
      */
     protected View makeControllerView(FrameLayout view) {
         if (!isAddToVideoView) {
+            mVideoRoot = view;
+
             int rootId = getRootViewId();
             if (rootId <= 0) {
                 rootId = R.layout.custom_media_controller;
             }
-//            LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//            mRoot = inflate.inflate(rootId, null);
 
             mRoot = LayoutInflater.from(mContext).inflate(rootId, this, true);
             initControllerView(mRoot);
@@ -207,32 +221,30 @@ public abstract class MediaController extends FrameLayout {
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
+            mPauseButton.setVisibility(getUsePause() ? View.VISIBLE : View.GONE);
         }
 
         mFfwdButton = v.findViewById(getFfwdId());
         if (mFfwdButton != null) {
             mFfwdButton.setOnClickListener(mFfwdListener);
-            if (!mFromXml) {
-                mFfwdButton.setVisibility(mUseFastForward ? View.VISIBLE : View.GONE);
-            }
+            mFfwdButton.setVisibility(getUseFastForward() ? View.VISIBLE : View.GONE);
         }
 
         mRewButton = v.findViewById(getRewId());
         if (mRewButton != null) {
             mRewButton.setOnClickListener(mRewListener);
-            if (!mFromXml) {
-                mRewButton.setVisibility(mUseFastForward ? View.VISIBLE : View.GONE);
-            }
+            mRewButton.setVisibility(getUseFastForward() ? View.VISIBLE : View.GONE);
         }
 
         // By default these are hidden. They will be enabled when setPrevNextListeners() is called
         mNextButton = v.findViewById(getNextId());
-        if (mNextButton != null && !mFromXml && !mListenersSet) {
-            mNextButton.setVisibility(View.GONE);
+        if (mNextButton != null) {
+            mNextButton.setVisibility(getUsePrevNext() ? View.VISIBLE : View.GONE);
         }
+
         mPrevButton = v.findViewById(getPrevId());
-        if (mPrevButton != null && !mFromXml && !mListenersSet) {
-            mPrevButton.setVisibility(View.GONE);
+        if (mPrevButton != null) {
+            mPrevButton.setVisibility(getUsePrevNext() ? View.VISIBLE : View.GONE);
         }
 
         mProgress = v.findViewById(getProgressId());
@@ -244,17 +256,31 @@ public abstract class MediaController extends FrameLayout {
             if (mProgress instanceof ProgressBar) {
                 ((ProgressBar) mProgress).setMax(1000);
             }
+            mProgress.setVisibility(getUseSeek() ? View.VISIBLE : View.GONE);
         }
 
         mEndTime = v.findViewById(getEndTimeId());
+        if (mEndTime != null) {
+            mEndTime.setVisibility(getUseTime() ? View.VISIBLE : View.GONE);
+        }
         mCurrentTime = v.findViewById(getCurrentTimeId());
+        if (mCurrentTime != null) {
+            mCurrentTime.setVisibility(getUseTime() ? View.VISIBLE : View.GONE);
+        }
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
         mExitButton = v.findViewById(getExitId());
+        if (mExitButton != null) {
+            mExitButton.setOnClickListener(mExitListener);
+        }
+
         mFullScreenButton = v.findViewById(getFullScreenId());
-        if (mFullScreenButton instanceof ImageView) {
-            ((ImageView)mFullScreenButton).setImageResource(getFullIconId());
+        if (mFullScreenButton != null) {
+            if (mFullScreenButton instanceof ImageView) {
+                ((ImageView) mFullScreenButton).setImageResource(mIsFullScreen ? getScreenIconId() : getFullIconId());
+            }
+            mFullScreenButton.setOnClickListener(mFullScreenListener);
         }
         installPrevNextListeners();
     }
@@ -263,8 +289,9 @@ public abstract class MediaController extends FrameLayout {
      * Show the controller on screen. It will go away
      * automatically after 3 seconds of inactivity.
      */
+    @Override
     public void show() {
-        show(sDefaultTimeout);
+        show(getDefaultTimeout());
     }
 
     /**
@@ -307,6 +334,7 @@ public abstract class MediaController extends FrameLayout {
      * @param timeout The timeout in milliseconds. Use 0 to show
      *                the controller until hide() is called.
      */
+    @Override
     public void show(int timeout) {
         if (mRoot == null) {
             return;
@@ -333,6 +361,7 @@ public abstract class MediaController extends FrameLayout {
         }
     }
 
+    @Override
     public boolean isShowing() {
         return mShowing;
     }
@@ -340,6 +369,7 @@ public abstract class MediaController extends FrameLayout {
     /**
      * Remove the controller from the screen.
      */
+    @Override
     public void hide() {
 
         if (mShowing && mRoot != null) {
@@ -424,7 +454,7 @@ public abstract class MediaController extends FrameLayout {
                 break;
             case MotionEvent.ACTION_UP:
                 if (!isShowing()) {
-                    show(sDefaultTimeout); // start timeout
+                    show(getDefaultTimeout()); // start timeout
                 } else {
                     hide();
                 }
@@ -440,7 +470,7 @@ public abstract class MediaController extends FrameLayout {
 
     @Override
     public boolean onTrackballEvent(MotionEvent ev) {
-        show(sDefaultTimeout);
+        show(getDefaultTimeout());
         return false;
     }
 
@@ -454,7 +484,7 @@ public abstract class MediaController extends FrameLayout {
                 || keyCode == KeyEvent.KEYCODE_SPACE) {
             if (uniqueDown) {
                 doPauseResume();
-                show(sDefaultTimeout);
+                show(getDefaultTimeout());
                 if (mPauseButton != null) {
                     mPauseButton.requestFocus();
                 }
@@ -464,7 +494,7 @@ public abstract class MediaController extends FrameLayout {
             if (uniqueDown && !mPlayer.isPlaying()) {
                 mPlayer.start();
                 updatePausePlay();
-                show(sDefaultTimeout);
+                show(getDefaultTimeout());
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP
@@ -472,7 +502,7 @@ public abstract class MediaController extends FrameLayout {
             if (uniqueDown && mPlayer.isPlaying()) {
                 mPlayer.pause();
                 updatePausePlay();
-                show(sDefaultTimeout);
+                show(getDefaultTimeout());
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
@@ -488,7 +518,7 @@ public abstract class MediaController extends FrameLayout {
             return true;
         }
 
-        show(sDefaultTimeout);
+        show(getDefaultTimeout());
         return super.dispatchKeyEvent(event);
     }
 
@@ -496,11 +526,9 @@ public abstract class MediaController extends FrameLayout {
         @Override
         public void onClick(View v) {
             doPauseResume();
-            show(sDefaultTimeout);
+            show(getDefaultTimeout());
         }
     };
-
-    private static final String TAG = MediaController.class.getSimpleName();
 
     private void updatePausePlay() {
         if (mRoot == null || mPauseButton == null) {
@@ -586,7 +614,7 @@ public abstract class MediaController extends FrameLayout {
             mDragging = false;
             setProgress();
             updatePausePlay();
-            show(sDefaultTimeout);
+            show(getDefaultTimeout());
 
             // Ensure that progress is properly updated in the future,
             // the call to show() does not guarantee this because it is a
@@ -622,6 +650,16 @@ public abstract class MediaController extends FrameLayout {
     }
 
     @Override
+    public int getDefaultTimeout() {
+        return DEFAULT_TIMEOUT;
+    }
+
+    @Override
+    public boolean getCanRotateScreen() {
+        return true;
+    }
+
+    @Override
     public CharSequence getAccessibilityClassName() {
         return MediaController.class.getName();
     }
@@ -634,7 +672,7 @@ public abstract class MediaController extends FrameLayout {
             mPlayer.seekTo(pos);
             setProgress();
 
-            show(sDefaultTimeout);
+            show(getDefaultTimeout());
         }
     };
 
@@ -646,9 +684,62 @@ public abstract class MediaController extends FrameLayout {
             mPlayer.seekTo(pos);
             setProgress();
 
-            show(sDefaultTimeout);
+            show(getDefaultTimeout());
         }
     };
+
+    private final View.OnClickListener mExitListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            toggleScreenOrExit();
+        }
+    };
+
+    @Override
+    public void toggleScreenOrExit() {
+        if (mIsFullScreen) {
+            toggleFullScreen();
+        } else {
+            if (mActivity != null) {
+                mActivity.finish();
+            }
+        }
+    }
+
+    private final View.OnClickListener mFullScreenListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            toggleFullScreen();
+        }
+    };
+
+    @Override
+    public void toggleFullScreen() {
+        if (!getCanRotateScreen()) {
+            mIsFullScreen = !mIsFullScreen;
+        } else if (mActivity != null) {
+            mIsFullScreen = ScreenUtil.toggleFullScreen(mActivity);
+        }
+        adjustVideoViewSize(mIsFullScreen);
+        if (mFullScreenButton instanceof ImageView) {
+            ((ImageView) mFullScreenButton).setImageResource(mIsFullScreen ? getScreenIconId() : getFullIconId());
+        }
+    }
+
+    @Override
+    public void adjustVideoViewSize(boolean isFullScreen) {
+        if (isFullScreen) {
+            mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mVideoOldWidth = mVideoRoot.getLayoutParams().width;
+            mVideoOldHeight = mVideoRoot.getLayoutParams().height;
+            mVideoRoot.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+            mVideoRoot.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+        } else {
+            mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mVideoRoot.getLayoutParams().width = mVideoOldWidth;
+            mVideoRoot.getLayoutParams().height = mVideoOldHeight;
+        }
+    }
 
     private void installPrevNextListeners() {
         if (mNextButton != null) {
@@ -662,50 +753,38 @@ public abstract class MediaController extends FrameLayout {
         }
     }
 
+    private View.OnClickListener mPrevListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mPlayer != null) {
+                mPlayer.previous();
+            }
+        }
+    };
+
+    private View.OnClickListener mNextListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mPlayer != null) {
+                mPlayer.next();
+            }
+        }
+    };
+
+    @Override
     public void setPrevNextListeners(View.OnClickListener next, View.OnClickListener prev) {
         mNextListener = next;
         mPrevListener = prev;
-        mListenersSet = true;
 
         if (mRoot != null) {
             installPrevNextListeners();
 
-            if (mNextButton != null && !mFromXml) {
+            if (mNextButton != null) {
                 mNextButton.setVisibility(View.VISIBLE);
             }
-            if (mPrevButton != null && !mFromXml) {
+            if (mPrevButton != null) {
                 mPrevButton.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    public interface MediaPlayerControl {
-        void start();
-
-        void pause();
-
-        int getDuration();
-
-        int getCurrentPosition();
-
-        void seekTo(int pos);
-
-        boolean isPlaying();
-
-        int getBufferPercentage();
-
-        boolean canPause();
-
-        boolean canSeekBackward();
-
-        boolean canSeekForward();
-
-        /**
-         * Get the audio session id for the player used by this VideoView. This can be used to
-         * apply audio effects to the audio track of a video.
-         *
-         * @return The audio session, or 0 if there was an error.
-         */
-        int getAudioSessionId();
     }
 }

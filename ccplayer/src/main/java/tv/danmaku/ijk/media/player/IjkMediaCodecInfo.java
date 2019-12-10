@@ -201,8 +201,9 @@ public class IjkMediaCodecInfo {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void dumpProfileLevels(String mimeType) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             return;
+        }
 
         try {
             CodecCapabilities caps = mCodecInfo

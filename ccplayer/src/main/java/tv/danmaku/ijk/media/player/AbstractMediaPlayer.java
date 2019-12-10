@@ -30,36 +30,44 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
     private OnInfoListener mOnInfoListener;
     private OnTimedTextListener mOnTimedTextListener;
 
+    @Override
     public final void setOnPreparedListener(OnPreparedListener listener) {
         mOnPreparedListener = listener;
     }
 
+    @Override
     public final void setOnCompletionListener(OnCompletionListener listener) {
         mOnCompletionListener = listener;
     }
 
+    @Override
     public final void setOnBufferingUpdateListener(
             OnBufferingUpdateListener listener) {
         mOnBufferingUpdateListener = listener;
     }
 
+    @Override
     public final void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
         mOnSeekCompleteListener = listener;
     }
 
+    @Override
     public final void setOnVideoSizeChangedListener(
             OnVideoSizeChangedListener listener) {
         mOnVideoSizeChangedListener = listener;
     }
 
+    @Override
     public final void setOnErrorListener(OnErrorListener listener) {
         mOnErrorListener = listener;
     }
 
+    @Override
     public final void setOnInfoListener(OnInfoListener listener) {
         mOnInfoListener = listener;
     }
 
+    @Override
     public final void setOnTimedTextListener(OnTimedTextListener listener) {
         mOnTimedTextListener = listener;
     }
@@ -76,30 +84,35 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
     }
 
     protected final void notifyOnPrepared() {
-        if (mOnPreparedListener != null)
+        if (mOnPreparedListener != null) {
             mOnPreparedListener.onPrepared(this);
+        }
     }
 
     protected final void notifyOnCompletion() {
-        if (mOnCompletionListener != null)
+        if (mOnCompletionListener != null) {
             mOnCompletionListener.onCompletion(this);
+        }
     }
 
     protected final void notifyOnBufferingUpdate(int percent) {
-        if (mOnBufferingUpdateListener != null)
+        if (mOnBufferingUpdateListener != null) {
             mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
+        }
     }
 
     protected final void notifyOnSeekComplete() {
-        if (mOnSeekCompleteListener != null)
+        if (mOnSeekCompleteListener != null) {
             mOnSeekCompleteListener.onSeekComplete(this);
+        }
     }
 
     protected final void notifyOnVideoSizeChanged(int width, int height,
                                                   int sarNum, int sarDen) {
-        if (mOnVideoSizeChangedListener != null)
+        if (mOnVideoSizeChangedListener != null) {
             mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height,
                     sarNum, sarDen);
+        }
     }
 
     protected final boolean notifyOnError(int what, int extra) {
@@ -111,10 +124,12 @@ public abstract class AbstractMediaPlayer implements IMediaPlayer {
     }
 
     protected final void notifyOnTimedText(IjkTimedText text) {
-        if (mOnTimedTextListener != null)
+        if (mOnTimedTextListener != null) {
             mOnTimedTextListener.onTimedText(this, text);
+        }
     }
 
+    @Override
     public void setDataSource(IMediaDataSource mediaDataSource) {
         throw new UnsupportedOperationException();
     }
