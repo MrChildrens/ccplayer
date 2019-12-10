@@ -351,7 +351,7 @@ public class VideoView extends FrameLayout
                 mMediaPlayer = new IjkPlayer(mContext);
                 break;
             default:
-                mMediaPlayer = new IjkPlayer(mContext);
+                mMediaPlayer = new AndroidMediaPlayer();
                 break;
         }
 

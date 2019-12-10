@@ -36,7 +36,9 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['libs']
+            if (player == "\"ijk\"") {
+                jniLibs.srcDirs = ['ijklibs']
+            }
         }
     }
 
