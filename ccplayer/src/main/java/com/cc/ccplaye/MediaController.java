@@ -104,34 +104,110 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
 
+    /**
+     * 控制条布局id
+     *
+     * @return
+     */
     protected abstract int getRootViewId();
 
+    /**
+     * 用于控制暂停播放的控件id，此控件需要在getRootViewId()布局里
+     * 此控件必须是ImageView或者其子类
+     *
+     * @return
+     */
     protected abstract int getPauseId();
 
+    /**
+     * 用于显示暂停状态的图标id
+     *
+     * @return
+     */
     protected abstract int getPauseIconId();
 
+    /**
+     * 用于显示播放状态的图标id
+     *
+     * @return
+     */
     protected abstract int getPlayIconId();
 
+    /**
+     * 用于显示快进的图标id
+     *
+     * @return
+     */
     protected abstract int getFfwdId();
 
+    /**
+     * 用于显示快退的图标id
+     *
+     * @return
+     */
     protected abstract int getRewId();
 
+    /**
+     * 用于显示下一集的图标id
+     *
+     * @return
+     */
     protected abstract int getNextId();
 
+    /**
+     * 用于显示上一集的图标id
+     *
+     * @return
+     */
     protected abstract int getPrevId();
 
+    /**
+     * 进度条id，此控件必须是SeekBar或者其子类
+     *
+     * @return
+     */
     protected abstract int getProgressId();
 
+    /**
+     * 显示视频总时间控件id，此控件必须是TextView或者其子类
+     *
+     * @return
+     */
     protected abstract int getEndTimeId();
 
+    /**
+     * 显示当前播放时间控件的id，此控件必须是TextView或者其子类
+     *
+     * @return
+     */
     protected abstract int getCurrentTimeId();
 
+    /**
+     * 用于退出全屏或退出当前界面的控件的id，此控件必须是ImageView或者其子类
+     *
+     * @return
+     */
     protected abstract int getExitId();
 
+    /**
+     * 用于切换全屏或窗口的控件的id，此控件必须是ImageView或者其子类
+     *
+     * @return
+     */
     protected abstract int getFullScreenId();
 
+    /**
+     * 用于显示全屏状态图标的id
+     *
+     * @return
+     */
     protected abstract int getFullIconId();
 
+    /**
+     * 用于显示窗口状态图标的id
+     *
+     * @return
+     */
     protected abstract int getScreenIconId();
 
     public MediaController(@NonNull Context context) {
@@ -550,7 +626,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 /* 手指抬起后处理相关的动作 */
-                if (mNeedChangePosition  && getUseSeekByTouch()) {
+                if (mNeedChangePosition && getUseSeekByTouch()) {
                     mNeedChangePosition = false;
                     mPlayer.seekTo(mNewPosition);
                     mRoot.post(mShowProgress);
