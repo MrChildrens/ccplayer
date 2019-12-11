@@ -32,7 +32,7 @@ public interface IMediaController {
     int getDefaultTimeout();
 
     /**
-     * 控制是否能旋转屏幕
+     *  控制是否能旋转屏幕
      *
      * @return
      */
