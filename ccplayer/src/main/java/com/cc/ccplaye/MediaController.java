@@ -69,7 +69,7 @@ import java.util.Locale;
  * with the boolean set to false
  * </ul>
  */
-public abstract class MediaController extends FrameLayout implements IMediaController {
+public abstract class MediaController extends FrameLayout implements IMediaController, View.OnTouchListener {
 
     private static final String TAG = MediaController.class.getSimpleName();
 
@@ -189,6 +189,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
     protected View makeControllerView(FrameLayout view) {
         if (!isAddToVideoView) {
             mVideoRoot = view;
+            mVideoRoot.setOnTouchListener(this);
 
             int rootId = getRootViewId();
             if (rootId <= 0) {
@@ -445,26 +446,153 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
         return position;
     }
 
+    /* 手指第一次触摸屏幕的X坐标 */
+    private float mDownX;
+    /* 手指第一次触摸屏幕的Y坐标 */
+    private float mDownY;
+    /* 是否需要快进快退的标志 */
+    private boolean mNeedChangePosition;
+    /* 是否需要调节音量的标志 */
+    private boolean mNeedChangeVolume;
+    /* 是否需要调节屏幕亮度的标志 */
+    private boolean mNeedChangeBrightness;
+    /* 规定在水平或垂直方向是移动的距离是否超过这个值 */
+    private static final int THRESHOLD = 50;
+    /* 在快进快退之前，记录上一次播放的位置 */
+    private long mGestureDownPosition;
+    /* 在调节亮度之前，记录上一次亮度的值 */
+    private float mGestureDownBrightness;
+    /* 在调节音量之前，记录上一次音量的值 */
+    private int mGestureDownVolume;
+    /* 快进快退需要seek的位置 */
+    private int mNewPosition;
+
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouch(View v, MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-//                show(0); // show until hide is called
+                mDownX = x;
+                mDownY = y;
+                mNeedChangePosition = false;
+                mNeedChangeVolume = false;
+                mNeedChangeBrightness = false;
                 break;
-            case MotionEvent.ACTION_UP:
-                if (!isShowing()) {
-                    show(getDefaultTimeout()); // start timeout
-                } else {
+            case MotionEvent.ACTION_MOVE:
+                float deltaX = x - mDownX;
+                float deltaY = y - mDownY;
+                float absDeltaX = Math.abs(deltaX);
+                float absDeltaY = Math.abs(deltaY);
+                if (!mNeedChangePosition && !mNeedChangeVolume && !mNeedChangeBrightness) {
+                    //只有播放、暂停、缓冲状态才能调节
+                    if (!mPlayer.isPlaying()) {
+                        return true;
+                    }
+                    if (absDeltaX >= THRESHOLD) {
+                        //快进快退
+                        mRoot.removeCallbacks(mShowProgress);
+                        mNeedChangePosition = true;
+                        mGestureDownPosition = mPlayer.getCurrentPosition();
+                    } else if (absDeltaY >= THRESHOLD) {
+                        if (mDownX < mVideoRoot.getWidth() * 0.5f) {
+                            // 左侧改变亮度
+                            mNeedChangeBrightness = true;
+                            mGestureDownBrightness = mActivity.getWindow().getAttributes().screenBrightness;
+                        } else {
+                            // 右侧改变声音
+                            mNeedChangeVolume = true;
+                            mGestureDownVolume = mPlayer.getVolume();
+                        }
+                    }
+                }
+                if (mNeedChangePosition && getUseSeekByTouch()) {
+                    int duration = mPlayer.getDuration();
+                    if (duration != 0) {
+                        int toPosition = (int) (mGestureDownPosition + duration * deltaX / mVideoRoot.getWidth());
+                        mNewPosition = Math.max(0, Math.min(duration, toPosition));
+                        int newPositionProgress = 1000 * mNewPosition / duration;
+                        if (mCurrentTime instanceof TextView) {
+                            ((TextView) mCurrentTime).setText(stringForTime(mNewPosition));
+                        }
+                        if (mProgress instanceof ProgressBar) {
+                            ((ProgressBar) mProgress).setProgress(newPositionProgress);
+                        }
+                        show();
+                        Log.d(TAG, "[Ciel_Debug] #onTouch()#: newPositionProgress: " + newPositionProgress);
+                    }
+                }
+                if (mNeedChangeBrightness && getUseAdjustBrightness()) {
+                    deltaY = -deltaY;
+                    float deltaBrightness = deltaY * 3 / mVideoRoot.getHeight();
+                    float newBrightness = mGestureDownBrightness + deltaBrightness;
+                    newBrightness = Math.max(0, Math.min(newBrightness, 1));
+                    float newBrightnessPercentage = newBrightness;
+                    WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+                    params.screenBrightness = newBrightnessPercentage;
+                    mActivity.getWindow().setAttributes(params);
+                    int newBrightnessProgress = (int) (100f * newBrightnessPercentage);
                     hide();
+                    Log.d(TAG, "[Ciel_Debug] #onTouch()#: newBrightnessPercentage: " + newBrightnessPercentage);
+                }
+                if (mNeedChangeVolume && getUseAdjustVolume()) {
+                    deltaY = -deltaY;
+                    int maxVolume = mPlayer.getMaxVolume();
+                    int deltaVolume = (int) (maxVolume * deltaY * 3 / mVideoRoot.getHeight());
+                    int newVolume = mGestureDownVolume + deltaVolume;
+                    newVolume = Math.max(0, Math.min(maxVolume, newVolume));
+                    mPlayer.setVolume(newVolume);
+                    int newVolumeProgress = (int) (100f * newVolume / maxVolume);
+                    hide();
+                    Log.d(TAG, "[Ciel_Debug] #onTouch()#: newVolumeProgress: " + newVolumeProgress);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-//                hide();
+            case MotionEvent.ACTION_UP:
+                /* 手指抬起后处理相关的动作 */
+                if (mNeedChangePosition  && getUseSeekByTouch()) {
+                    mNeedChangePosition = false;
+                    mPlayer.seekTo(mNewPosition);
+                    mRoot.post(mShowProgress);
+                    return true;
+                }
+                if (mNeedChangeBrightness && getUseAdjustBrightness()) {
+                    mNeedChangeBrightness = false;
+                    return true;
+                }
+                if (mNeedChangeVolume && getUseAdjustVolume()) {
+                    mNeedChangeVolume = false;
+                    return true;
+                }
+                toggleMediaControlsVisiblity();
                 break;
             default:
                 break;
         }
         return true;
+    }
+
+    @Override
+    public boolean getUseSeekByTouch() {
+        return false;
+    }
+
+    @Override
+    public boolean getUseAdjustVolume() {
+        return false;
+    }
+
+    @Override
+    public boolean getUseAdjustBrightness() {
+        return false;
+    }
+
+    private void toggleMediaControlsVisiblity() {
+        if (!mShowing) {
+            show();
+        } else {
+            hide();
+        }
     }
 
     @Override

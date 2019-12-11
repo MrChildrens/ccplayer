@@ -36,6 +36,12 @@ public interface IMediaController {
 
     boolean getUseSeek();
 
+    boolean getUseSeekByTouch();
+
+    boolean getUseAdjustVolume();
+
+    boolean getUseAdjustBrightness();
+
     void toggleFullScreen();
 
     void adjustVideoViewSize(boolean isFullScreen);
@@ -58,6 +64,12 @@ public interface IMediaController {
         boolean isPlaying();
 
         int getBufferPercentage();
+
+        int getVolume();
+
+        int getMaxVolume();
+
+        void setVolume(int volume);
 
         boolean canPause();
 

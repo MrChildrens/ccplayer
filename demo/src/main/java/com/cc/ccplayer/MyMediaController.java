@@ -133,4 +133,19 @@ public class MyMediaController extends MediaController {
     public boolean getUseSeek() {
         return true;
     }
+
+    @Override
+    public boolean getUseSeekByTouch() {
+        return true;
+    }
+
+    @Override
+    public boolean getUseAdjustBrightness() {
+        return true;
+    }
+
+    @Override
+    public boolean getUseAdjustVolume() {
+        return true;
+    }
 }

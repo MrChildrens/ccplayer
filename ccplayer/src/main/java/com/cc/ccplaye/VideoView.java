@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.cc.ccplaye.android.AndroidMediaPlayer;
@@ -556,7 +557,6 @@ public abstract class VideoView extends FrameLayout
             new IMediaPlayer.OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-                    Log.d(TAG, "[Ciel_Debug] #onBufferingUpdate()#: " + percent);
                     mCurrentBufferPercentage = percent;
                 }
             };
@@ -664,14 +664,35 @@ public abstract class VideoView extends FrameLayout
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_UP
-                && isInPlaybackState() && mMediaController != null) {
-            toggleMediaControlsVisiblity();
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent ev) {
+//        Log.d("Ciel_ddd", "[Ciel_Debug] #onTouchEvent()#: 1 : " + ev.getAction());
+//        Log.d("Ciel_ddd", "[Ciel_Debug] #onTouchEvent()#: " + getChildAt(0));
+//        Log.d("Ciel_ddd", "[Ciel_Debug] #onTouchEvent()#: " + getChildAt(1));
+//        if (ev.getAction() == MotionEvent.ACTION_UP
+//                && isInPlaybackState() && mMediaController != null) {
+//            toggleMediaControlsVisiblity();
+//                    }
+//        return false;
+//    }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        Log.d("Ciel_ddd", "[Ciel_Debug] #dispatchTouchEvent()#: " + ev.getAction());
+//        return super.dispatchTouchEvent(ev);
+//    }
+
+//    @Override
+//    public boolean onTouch(View v, MotionEvent event) {
+//
+//        if (event.getAction() == MotionEvent.ACTION_UP
+//                && isInPlaybackState() && mMediaController != null) {
+//            toggleMediaControlsVisiblity();
+//        }
+//        return true;
+//    }
+
+
 
     @Override
     public boolean onTrackballEvent(MotionEvent ev) {
@@ -725,8 +746,10 @@ public abstract class VideoView extends FrameLayout
 
     private void toggleMediaControlsVisiblity() {
         if (mMediaController.isShowing()) {
+            Log.d("Ciel_ddd", "[Ciel_Debug] #toggleMediaControlsVisiblity()#: hide");
             mMediaController.hide();
         } else {
+            Log.d("Ciel_ddd", "[Ciel_Debug] #toggleMediaControlsVisiblity()#: show");
             mMediaController.show();
         }
     }
@@ -807,6 +830,29 @@ public abstract class VideoView extends FrameLayout
             return mCurrentBufferPercentage;
         }
         return 0;
+    }
+
+    @Override
+    public int getVolume() {
+        if (mAudioManager != null) {
+            return mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        }
+        return 0;
+    }
+
+    @Override
+    public int getMaxVolume() {
+        if (mAudioManager != null) {
+            return mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        }
+        return 0;
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        if (mAudioManager != null) {
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+        }
     }
 
     private boolean isInPlaybackState() {
@@ -891,5 +937,4 @@ public abstract class VideoView extends FrameLayout
     public void draw(Canvas canvas) {
         super.draw(canvas);
     }
-
 }
