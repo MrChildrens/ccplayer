@@ -76,5 +76,7 @@ public interface IMediaController {
         boolean next();
 
         boolean previous();
+
+        void changeAspectRatio(int aspectRaito);
     }
 }

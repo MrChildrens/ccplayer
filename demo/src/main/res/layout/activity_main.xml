@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.cc.ccplaye.VideoView
+    <com.cc.ccplayer.MyVideoView
         android:id="@+id/videoview_play"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@android:color/holo_red_dark"
-        app:layout_constraintDimensionRatio="2:1"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintDimensionRatio="16:8"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

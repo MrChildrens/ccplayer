@@ -38,7 +38,7 @@ import java.util.Map;
  * @date: 2019/12/5
  */
 
-public class VideoView extends FrameLayout
+public abstract class VideoView extends FrameLayout
         implements IMediaController.MediaPlayerControl {
 
     private static final String TAG = VideoView.class.getSimpleName();
@@ -86,6 +86,8 @@ public class VideoView extends FrameLayout
 
     private Context mContext;
 
+    public abstract int initAspectRatio();
+
     public VideoView(Context context) {
         this(context, null);
     }
@@ -120,6 +122,7 @@ public class VideoView extends FrameLayout
 
     private void initSurfaceView() {
         mSurfaceView = new SurfaceRenderView(mContext);
+        mSurfaceView.setAspectRatio(initAspectRatio());
         mSurfaceView.getHolder().addCallback(mSHCallback);
         mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         LayoutParams lp = new LayoutParams(
@@ -860,6 +863,13 @@ public class VideoView extends FrameLayout
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void changeAspectRatio(int aspectRaito) {
+        if (mSurfaceView != null) {
+            mSurfaceView.setAspectRatio(aspectRaito);
+        }
     }
 
     @Override

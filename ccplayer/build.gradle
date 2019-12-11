@@ -36,6 +36,10 @@ android {
 
     sourceSets {
         main {
+            /*
+            *使用这个方法加载so文件，主目录build.gralde文件下gradle的版本为3.4.x时可以加载成功
+            * gradle的版本为3.5.x时不能加载成功
+            *             * */
             if (player == "\"ijk\"") {
                 jniLibs.srcDirs = ['ijklibs']
             }
@@ -46,7 +50,9 @@ android {
 
 dependencies {
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleCompatible
     implementation 'com.android.support:support-v4:28.0.0'
+    //noinspection GradleCompatible
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
