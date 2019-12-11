@@ -55,8 +55,9 @@ public class AndroidTrackInfo implements ITrackInfo {
         if (mTrackInfo == null) {
             return null;
         }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             return null;
+        }
 
         MediaFormat mediaFormat = mTrackInfo.getFormat();
         if (mediaFormat == null) {

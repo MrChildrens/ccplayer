@@ -16,26 +16,43 @@ android {
     }
 
     buildTypes {
+        /*
+            *player变量需要在主目录下的gradle.properties定义,才能读取
+            * 例如:player:ijk
+            *      player:android
+            *      player:exo
+            *      player:vlc
+            *      player的值与类Constant定义的播放器类型对应
+            */
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "PLAYER_TYPE", player
+        }
+        debug {
+            buildConfigField "String", "PLAYER_TYPE", player
         }
     }
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['libs']
+            /*
+            *使用这个方法加载so文件，主目录build.gralde文件下gradle的版本为3.4.x时可以加载成功
+            * gradle的版本为3.5.x时不能加载成功
+            *             * */
+            if (player == "\"ijk\"") {
+                jniLibs.srcDirs = ['ijklibs']
+            }
         }
     }
 
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+//    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleCompatible
+    implementation 'com.android.support:support-v4:28.0.0'
+    //noinspection GradleCompatible
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }

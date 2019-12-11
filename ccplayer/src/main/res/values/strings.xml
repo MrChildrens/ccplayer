@@ -20,6 +20,6 @@
     <string name="pref_key_enable_texture_view">pref.enable_texture_view</string>
     <string name="pref_key_enable_detached_surface_texture">pref.enable_detached_surface_texture</string>
     <string name="pref_key_using_mediadatasource">pref.using_mediadatasource</string>
-    <string name="pref_key_last_directory"></string>
+    <string name="pref_key_last_directory"> </string>
 
 </resources>

@@ -377,8 +377,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             notifyOnVideoSizeChanged(width, height, 1, 1);
         }
@@ -386,8 +387,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onSeekComplete(MediaPlayer mp) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             notifyOnSeekComplete();
         }
@@ -395,8 +397,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onBufferingUpdate(MediaPlayer mp, int percent) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             notifyOnBufferingUpdate(percent);
         }
@@ -404,8 +407,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onCompletion(MediaPlayer mp) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             notifyOnCompletion();
         }
@@ -413,8 +417,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onPrepared(MediaPlayer mp) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             notifyOnPrepared();
         }
@@ -422,8 +427,9 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void onTimedText(MediaPlayer mp, TimedText text) {
             AndroidMediaPlayer self = mWeakMediaPlayer.get();
-            if (self == null)
+            if (self == null) {
                 return;
+            }
 
             IjkTimedText ijkText = null;
 

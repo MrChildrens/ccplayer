@@ -950,6 +950,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     private native void native_message_loop(Object IjkMediaPlayer_this);
 
+    @Override
     protected void finalize() throws Throwable {
         super.finalize();
         native_finalize();
@@ -1239,8 +1240,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public String onMediaCodecSelect(IMediaPlayer mp, String mimeType, int profile, int level) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                 return null;
+            }
 
             if (TextUtils.isEmpty(mimeType)) {
                 return null;

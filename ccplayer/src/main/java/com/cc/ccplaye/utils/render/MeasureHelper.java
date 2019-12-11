@@ -1,4 +1,4 @@
-package com.cc.ccplaye.render;
+package com.cc.ccplaye.utils.render;
 
 import android.view.View;
 
@@ -149,7 +149,6 @@ public final class MeasureHelper {
         } else {
             // no size yet, just adopt the given spec sizes
         }
-//        Log.d(TAG, "[ciel_debug][doMeasure]: " + width + " " + height);
         mMeasuredWidth = width;
         mMeasuredHeight = height;
     }

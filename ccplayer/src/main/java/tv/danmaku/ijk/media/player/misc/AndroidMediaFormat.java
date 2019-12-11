@@ -31,8 +31,9 @@ public class AndroidMediaFormat implements IMediaFormat {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public int getInteger(String name) {
-        if (mMediaFormat == null)
+        if (mMediaFormat == null) {
             return 0;
+        }
 
         return mMediaFormat.getInteger(name);
     }
@@ -40,8 +41,9 @@ public class AndroidMediaFormat implements IMediaFormat {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public String getString(String name) {
-        if (mMediaFormat == null)
+        if (mMediaFormat == null) {
             return null;
+        }
 
         return mMediaFormat.getString(name);
     }

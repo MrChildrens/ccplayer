@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -96,11 +96,6 @@
         app:layout_constraintBottom_toBottomOf="@id/tv_starttime"
         app:layout_constraintEnd_toStartOf="@id/iv_switch_screen" />
 
-    <androidx.constraintlayout.widget.Group
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="tv_starttime,seekbar_progress,tv_endtime,iv_play_or_pause,iv_forward,iv_rewind,iv_next_episode,iv_previous_episode" />
-
     <ImageView
         android:id="@+id/iv_switch_screen"
         android:layout_width="@dimen/play_switch_screen_icon_width"
@@ -109,4 +104,4 @@
         android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</android.support.constraint.ConstraintLayout>
