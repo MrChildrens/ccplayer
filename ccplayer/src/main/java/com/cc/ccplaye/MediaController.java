@@ -288,6 +288,11 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
     }
 
     private void initControllerView(View v) {
+
+        if (v instanceof ViewGroup) {
+            hideChildView((ViewGroup) v);
+        }
+
         Resources res = mContext.getResources();
         mPlayDescription = res
                 .getText(R.string.lockscreen_transport_play_description);
@@ -349,6 +354,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
         mExitButton = v.findViewById(getExitId());
         if (mExitButton != null) {
             mExitButton.setOnClickListener(mExitListener);
+            mExitButton.setVisibility(View.VISIBLE);
         }
 
         mFullScreenButton = v.findViewById(getFullScreenId());
@@ -357,8 +363,20 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
                 ((ImageView) mFullScreenButton).setImageResource(mIsFullScreen ? getScreenIconId() : getFullIconId());
             }
             mFullScreenButton.setOnClickListener(mFullScreenListener);
+            mFullScreenButton.setVisibility(View.VISIBLE);
         }
         installPrevNextListeners();
+    }
+
+    private void hideChildView(ViewGroup viewGroup) {
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            if (viewGroup.getChildAt(i) instanceof ViewGroup) {
+                hideChildView((ViewGroup) viewGroup.getChildAt(i));
+            } else {
+                Log.d(TAG, "[Ciel_Debug] #hideChildView()#: " + viewGroup.getChildAt(i));
+                viewGroup.getChildAt(i).setVisibility(View.GONE);
+            }
+        }
     }
 
     /**
@@ -840,10 +858,10 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
             mRewButton.setEnabled(enabled);
         }
         if (mNextButton != null) {
-            mNextButton.setEnabled(enabled && mNextListener != null);
+            mNextButton.setEnabled(/*enabled && */mNextListener != null);
         }
         if (mPrevButton != null) {
-            mPrevButton.setEnabled(enabled && mPrevListener != null);
+            mPrevButton.setEnabled(/*enabled && */mPrevListener != null);
         }
         if (mProgress != null) {
             mProgress.setEnabled(enabled);
@@ -903,8 +921,16 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
         if (mIsFullScreen) {
             toggleFullScreen();
         } else {
+            hide();
+            if (mRoot != null) {
+                mRoot.removeCallbacks(mShowProgress);
+                mRoot.removeCallbacks(mFadeOut);
+                mRoot.removeCallbacks(null);
+                mRoot = null;
+            }
             if (mActivity != null) {
                 mActivity.finish();
+                mActivity = null;
             }
         }
     }

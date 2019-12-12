@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaFormat;
@@ -111,6 +112,8 @@ public abstract class VideoView extends FrameLayout
         mAudioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE).build();
 
+        setBackgroundColor(Color.BLACK);
+
         initSurfaceView();
 
         setFocusable(true);
@@ -166,6 +169,14 @@ public abstract class VideoView extends FrameLayout
         mPaths = paths;
         mIndex = index;
         setVideoURI(Uri.parse(paths[index]));
+    }
+
+    public int getIndex() {
+        return mIndex;
+    }
+
+    public void setIndex(int index) {
+        mIndex = index;
     }
 
     /**
@@ -522,7 +533,7 @@ public abstract class VideoView extends FrameLayout
                      * if we're attached to a window. When we're going away and no
                      * longer have a window, don't bother showing the user an error.
                      */
-                    if (getWindowToken() != null) {
+                    /*if (getWindowToken() != null) {
                         Resources r = mContext.getResources();
                         int messageId;
 
@@ -538,9 +549,9 @@ public abstract class VideoView extends FrameLayout
                                         new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int whichButton) {
-                                                /* If we get here, there is no onError listener, so
+                                                *//* If we get here, there is no onError listener, so
                                                  * at least inform them that the video is over.
-                                                 */
+                                                 *//*
                                                 if (mOnCompletionListener != null) {
                                                     mOnCompletionListener.onCompletion(mMediaPlayer);
                                                 }
@@ -548,7 +559,7 @@ public abstract class VideoView extends FrameLayout
                                         })
                                 .setCancelable(false)
                                 .show();
-                    }
+                    }*/
                     return true;
                 }
             };
@@ -860,6 +871,10 @@ public abstract class VideoView extends FrameLayout
                 mCurrentState != IMediaPlayer.STATE_ERROR &&
                 mCurrentState != IMediaPlayer.STATE_IDLE &&
                 mCurrentState != IMediaPlayer.STATE_PREPARING);
+    }
+
+    public void setSeekWhenPrepared(int seekWhenPrepared) {
+        mSeekWhenPrepared = seekWhenPrepared;
     }
 
     @Override
