@@ -6,7 +6,7 @@ android {
 
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -41,7 +41,7 @@ android {
             * gradle的版本为3.5.x时不能加载成功
             *             * */
             if (player == "\"ijk\"") {
-                jniLibs.srcDirs = ['ijklibs']
+                jniLibs.srcDirs = ['libs']
             }
         }
     }
@@ -49,10 +49,5 @@ android {
 }
 
 dependencies {
-//    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //noinspection GradleCompatible
-    implementation 'com.android.support:support-v4:28.0.0'
-    //noinspection GradleCompatible
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
 }

@@ -5,10 +5,7 @@ package com.cc.ccplaye;
  * @date: 2019/12/5 17:42
  */
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.media.AudioAttributes;
@@ -23,7 +20,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import com.cc.ccplaye.android.AndroidMediaPlayer;
