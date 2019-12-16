@@ -1,0 +1,80 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        /*
+            *player变量需要在主目录下的gradle.properties定义,才能读取
+            * 例如:player:ijk
+            *      player:android
+            *      player:exo
+            *      player:vlc
+            *      player的值与类Constant定义的播放器类型对应
+            */
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "PLAYER_TYPE", player
+        }
+        debug {
+            buildConfigField "String", "PLAYER_TYPE", player
+        }
+    }
+
+    sourceSets {
+        main {
+            /*
+            *使用这个方法加载so文件，主目录build.gralde文件下gradle的版本为3.4.x时可以加载成功
+            * gradle的版本为3.5.x时不能加载成功
+            *             * */
+            if (player == "\"ijk\"") {
+                jniLibs.srcDirs = ['libs/ijk']
+            }
+        }
+    }
+}
+
+dependencies {
+    //implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleCompatible
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    //noinspection GradleCompatible
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    
+    /**
+     * 由于exoplayer依赖库使用了androidx，所以为了编译能通过，只能打开androidx
+     */
+    api 'com.google.android.exoplayer:exoplayer:2.10.4'
+    /*需要在项目的build.gradle添加以下代码 ， 才能成功添加aar文件
+        allprojects {
+            repositories {
+                ...
+                flatDir {
+                    //所有的module的repositories下把library module中的libs目录添加到依赖关系中
+                    dirs project(':ccplayer').file('libs/exo')
+                }
+            }
+        }*/
+    if (player == "\"exo\"") {
+        api(name: 'extension-ffmpeg', ext: 'aar')
+        api(name: 'extension-flac', ext: 'aar')
+//    api(name: 'extension-ima', ext: 'aar')
+        api(name: 'extension-opus', ext: 'aar')
+        api(name: 'extension-rtmp', ext: 'aar')
+        api(name: 'extension-vp9', ext: 'aar')
+    }
+}

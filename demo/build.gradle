@@ -33,5 +33,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     //noinspection GradleCompatible
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation project(path: ':ccplayer:main')
+    implementation project(path: ':ccplayer')
 }
