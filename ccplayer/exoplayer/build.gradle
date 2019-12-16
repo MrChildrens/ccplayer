@@ -1,0 +1,67 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
+    implementation 'androidx.fragment:fragment:1.1.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
+
+    /**
+     * 由于exoplayer依赖库使用了androidx，所以为了编译能通过，只能打开androidx
+     */
+    api 'com.google.android.exoplayer:exoplayer:2.10.4'
+    api 'com.google.android.exoplayer:exoplayer-core:2.10.4'
+    api 'com.google.android.exoplayer:exoplayer-dash:2.10.4'
+    api 'com.google.android.exoplayer:exoplayer-hls:2.10.4'
+    api 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.10.4'
+    api 'com.google.android.exoplayer:exoplayer-ui:2.10.4'
+
+    /* 需要在项目的build.gradle添加以下代码，才能成功添加aar文件
+      allprojects {
+        repositories {
+            ...
+            flatDir {
+                //所有的module的repositories下把library module中的libs目录添加到依赖关系中
+                dirs project(':ccplayer:exoplayer').file('libs')
+            }
+        }
+    }*/
+
+    api(name: 'extension-ffmpeg', ext: 'aar')
+    api(name: 'extension-flac', ext: 'aar')
+//    api(name: 'extension-ima', ext: 'aar')
+    api(name: 'extension-opus', ext: 'aar')
+    api(name: 'extension-rtmp', ext: 'aar')
+    api(name: 'extension-vp9', ext: 'aar')
+}

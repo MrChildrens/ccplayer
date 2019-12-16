@@ -13,7 +13,6 @@ import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,10 +21,14 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.cc.ccplaye.android.AndroidMediaPlayer;
+import com.cc.ccplaye.exoplayer.ExoPlayer;
 import com.cc.ccplaye.ijkplayer.IjkPlayer;
 import com.cc.ccplaye.utils.Constant;
 import com.cc.ccplaye.utils.render.SurfaceRenderView;
+import com.cc.ccplayer.ijkplayer.BuildConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -360,6 +363,9 @@ public abstract class VideoView extends FrameLayout
                 break;
             case Constant.PLAYER_IJK:
                 mMediaPlayer = new IjkPlayer(mContext);
+                break;
+            case Constant.PLAYER_EXO:
+                mMediaPlayer = new ExoPlayer(mContext);
                 break;
             default:
                 mMediaPlayer = new AndroidMediaPlayer();

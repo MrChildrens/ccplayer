@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.cc.ccplaye.R;
+import com.cc.player.R;
 
 public class Settings {
     private Context mAppContext;

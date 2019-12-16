@@ -1,1 +1,1 @@
-include ':demo', ':ccplayer:ijkplayer', ':ccplayer:main'
+include ':demo', ':ccplayer:ijkplayer', ':ccplayer:main', ':ccplayer:exoplayer'
