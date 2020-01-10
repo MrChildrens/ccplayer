@@ -34,4 +34,5 @@ dependencies {
     //noinspection GradleCompatible
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation project(path: ':ccplayer')
+//    implementation 'com.github.MrChildrens:ccplayer:1.0.0'
 }
