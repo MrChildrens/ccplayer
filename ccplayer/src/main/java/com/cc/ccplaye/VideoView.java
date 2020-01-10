@@ -125,6 +125,7 @@ public abstract class VideoView extends FrameLayout
 
     private void initSurfaceView() {
         mSurfaceView = new SurfaceRenderView(mContext);
+        mSurfaceView.setBackgroundColor(Color.BLACK);
         mSurfaceView.setAspectRatio(initAspectRatio());
         mSurfaceView.getHolder().addCallback(mSHCallback);
         mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -773,6 +774,7 @@ public abstract class VideoView extends FrameLayout
             Log.d(TAG, "[Ciel_Debug] #start()#: isInPlaybackState! MediaPlayer#start()");
             mMediaPlayer.start();
             mCurrentState = IMediaPlayer.STATE_PLAYING;
+            mSurfaceView.setBackgroundColor(Color.TRANSPARENT);
         }
         Log.d(TAG, "[Ciel_Debug] #start()#: set TargetState STATE_PLAYING");
         mTargetState = IMediaPlayer.STATE_PLAYING;

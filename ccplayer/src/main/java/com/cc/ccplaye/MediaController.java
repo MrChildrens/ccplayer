@@ -76,6 +76,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
     private static final String TAG = MediaController.class.getSimpleName();
 
     private static final int DEFAULT_TIMEOUT = 10000;
+    private static final int FAST_REWIND_TIME = 15000;
 
     private IMediaController.MediaPlayerControl mPlayer;
     private Context mContext;
@@ -355,7 +356,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
 
         mExitButton = v.findViewById(getExitId());
         if (mExitButton != null) {
-            mExitButton.setOnClickListener(mExitListener);
+            initExitListener();
             mExitButton.setVisibility(View.VISIBLE);
         }
 
@@ -364,10 +365,18 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
             if (mFullScreenButton instanceof ImageView) {
                 ((ImageView) mFullScreenButton).setImageResource(mIsFullScreen ? getScreenIconId() : getFullIconId());
             }
-            mFullScreenButton.setOnClickListener(mFullScreenListener);
+            initFullScreenListener();
             mFullScreenButton.setVisibility(View.VISIBLE);
         }
         installPrevNextListeners();
+    }
+
+    protected void initExitListener() {
+        mExitButton.setOnClickListener(mExitListener);
+    }
+
+    protected void initFullScreenListener() {
+        mFullScreenButton.setOnClickListener(mFullScreenListener);
     }
 
     private void hideChildView(ViewGroup viewGroup) {
@@ -890,7 +899,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
         @Override
         public void onClick(View v) {
             int pos = mPlayer.getCurrentPosition();
-            pos -= 5000; // milliseconds
+            pos -= FAST_REWIND_TIME; // milliseconds
             mPlayer.seekTo(pos);
             setProgress();
 
@@ -902,7 +911,7 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
         @Override
         public void onClick(View v) {
             int pos = mPlayer.getCurrentPosition();
-            pos += 15000; // milliseconds
+            pos += FAST_REWIND_TIME; // milliseconds
             mPlayer.seekTo(pos);
             setProgress();
 
@@ -916,6 +925,8 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
             toggleScreenOrExit();
         }
     };
+
+
 
     @Override
     public void toggleScreenOrExit() {
@@ -1015,6 +1026,27 @@ public abstract class MediaController extends FrameLayout implements IMediaContr
             if (mPrevButton != null) {
                 mPrevButton.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    @Override
+    public boolean isFullScreen() {
+        return mIsFullScreen;
+    }
+
+    @Override
+    public int getFastRewindTime() {
+        return FAST_REWIND_TIME;
+    }
+
+    @Override
+    public void releaseController() {
+        hide();
+        if (mRoot != null) {
+            mRoot.removeCallbacks(mShowProgress);
+            mRoot.removeCallbacks(mFadeOut);
+            mRoot.removeCallbacks(null);
+            mRoot = null;
         }
     }
 }

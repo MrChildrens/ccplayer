@@ -111,6 +111,12 @@ public interface IMediaController {
      */
     void toggleScreenOrExit();
 
+    boolean isFullScreen();
+
+    int getFastRewindTime();
+
+    void releaseController();
+
     interface MediaPlayerControl {
         void start();
 

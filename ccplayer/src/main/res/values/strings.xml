@@ -1,6 +1,4 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">CcPlaye</string>
-
     <!--ijk-->
     <string name="VideoView_error_text_invalid_progressive_playback">This video isn\'t valid for streaming to this device.</string>
     <string name="VideoView_error_text_unknown">Can\'t play this video.</string>
